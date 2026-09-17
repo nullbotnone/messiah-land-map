@@ -63,6 +63,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--gold-bright); o
 .city-tools { position: absolute; top: 28px; right: 22px; display: flex; flex-direction: column; gap: 6px; z-index: 4; }
 .city-tools button { width: 46px; min-height: 40px; cursor: pointer; border: 1px solid var(--line); background: #09171bd9; color: #d4c8ac; font-size: 12px; backdrop-filter: blur(8px); }
 .city-tools button:hover { background: #25352e; border-color: var(--gold); }
+.city-tools button.on { color: var(--gold-bright); border-color: var(--gold); }
 .city-north-arrow { display: inline-block; color: var(--gold-bright); }
 .city-labels { position: absolute; inset: 0; pointer-events: none; }
 .city-label { position: absolute; visibility: hidden; transform: translate(-50%, -100%); color: #eee4cd; background: #071619c9; border: 1px solid #c8a75d40; border-left: 2px solid #c8a75d80; padding: 6px 9px; font-size: 10px; cursor: pointer; pointer-events: auto; white-space: nowrap; backdrop-filter: blur(5px); }

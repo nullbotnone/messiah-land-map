@@ -8,8 +8,14 @@ import { cityGround, jerusalemSites, landformLabels, PLATFORM, SOURCES, type Jer
 import { toTraditional } from './zh-hant';
 
 type Lang = 'hans' | 'hant' | 'en';
-type Viewer = { focus: (site?: JerusalemSite) => void; zoom: (factor: number) => void; north: () => void; top: () => void };
-type Layers = { housing: boolean; walls: boolean; roads: boolean; labels: boolean };
+type Viewer = {
+  focus: (site?: JerusalemSite) => void;
+  zoom: (factor: number) => void;
+  north: () => void;
+  top: () => void;
+  setShadows: (enabled: boolean) => void;
+};
+type Layers = { housing: boolean; walls: boolean; roads: boolean; labels: boolean; shadows: boolean };
 
 /** The city view is unmounted when the reader goes back to the regional map, so
  * the chosen site is kept here rather than lost with the WebGL context. */
@@ -27,7 +33,7 @@ export default function JerusalemMap({ lang, onReturn }: { lang: Lang; onReturn:
   const layersRef = useRef<ReturnType<typeof buildJerusalemScene> | null>(null);
   const selectedRef = useRef(lastSelected);
   const [selected, setSelected] = useState(lastSelected);
-  const [layers, setLayers] = useState<Layers>({ housing: true, walls: true, roads: true, labels: true });
+  const [layers, setLayers] = useState<Layers>({ housing: true, walls: true, roads: true, labels: true, shadows: true });
   const [failed, setFailed] = useState(false);
   const active = jerusalemSites.find((s) => s.id === selected)!;
 
@@ -117,6 +123,7 @@ export default function JerusalemMap({ lang, onReturn }: { lang: Lang; onReturn:
       if (compass) compass.style.transform = `rotate(${-controls.getAzimuthalAngle()}rad)`;
       if (!animation && performance.now() < awakeUntil) animation = requestAnimationFrame(render);
     }
+    let shadowsEnabled = true;
     viewer.current = {
       focus(site) {
         if (!site) defaultView();
@@ -143,6 +150,23 @@ export default function JerusalemMap({ lang, onReturn }: { lang: Lang; onReturn:
         const distance = camera.position.distanceTo(controls.target);
         camera.position.copy(controls.target).add(new THREE.Vector3(0, distance, 1));
         controls.update(); wake();
+      },
+      setShadows(enabled) {
+        if (shadowsEnabled === enabled) return;
+        shadowsEnabled = enabled;
+        renderer.shadowMap.enabled = enabled;
+        renderer.shadowMap.needsUpdate = true;
+        sun.castShadow = enabled;
+        scene.traverse((object) => {
+          if (object instanceof THREE.Mesh) {
+            if (Array.isArray(object.material)) {
+              object.material.forEach((m) => { m.needsUpdate = true; });
+            } else if (object.material) {
+              object.material.needsUpdate = true;
+            }
+          }
+        });
+        wake();
       },
     };
     const resize = new ResizeObserver(() => {
@@ -214,6 +238,7 @@ export default function JerusalemMap({ lang, onReturn }: { lang: Lang; onReturn:
     const city = layersRef.current;
     if (!city) return;
     city.housing.visible = layers.housing; city.walls.visible = layers.walls; city.roads.visible = layers.roads;
+    viewer.current?.setShadows(layers.shadows);
     viewer.current?.zoom(1);
   }, [layers]);
 
@@ -242,6 +267,15 @@ export default function JerusalemMap({ lang, onReturn }: { lang: Lang; onReturn:
           <button onClick={() => viewer.current?.zoom(0.8)} aria-label={t('缩小', 'Zoom out')}>−</button>
           <button onClick={() => viewer.current?.top()}>{t('俯瞰', 'Top')}</button>
           <button onClick={() => viewer.current?.focus()}>{t('全城', 'City')}</button>
+          <button
+            className={layers.shadows ? 'on' : ''}
+            onClick={() => setLayers((v) => ({ ...v, shadows: !v.shadows }))}
+            aria-pressed={layers.shadows}
+            aria-label={t('切换阴影效果', 'Toggle shadow effect')}
+            title={t(layers.shadows ? '关闭阴影' : '开启阴影', layers.shadows ? 'Turn off shadow' : 'Turn on shadow')}
+          >
+            {t('阴影', 'Shadow')}
+          </button>
         </div>
         <div className="city-terrain-key">
           <b>{t('橄榄山 810 → 汲沦谷 660 → 圣殿山 740 → 中央谷 720 → 上城 775（米）', 'Olives 810 → Kidron 660 → Temple Mount 740 → Central Valley 720 → Upper City 775 (m)')}</b>
@@ -264,7 +298,22 @@ export default function JerusalemMap({ lang, onReturn }: { lang: Lang; onReturn:
           <div className="city-source-links">{active.sources.map((key) => <a key={key} href={SOURCES[key].url} target="_blank" rel="noreferrer">{SOURCES[key].title} ↗</a>)}</div>
         </article>
         <div className="city-layers" aria-label={t('城市图层', 'City layers')}>
-          {([['housing', t('住宅', 'Houses')], ['walls', t('城墙', 'Walls')], ['roads', t('阶梯朝圣街道', 'Stepped street')], ['labels', t('标注', 'Labels')]] as const).map(([key, label]) => <button key={key} aria-pressed={layers[key]} className={layers[key] ? 'on' : ''} onClick={() => setLayers((v) => ({ ...v, [key]: !v[key] }))}><i />{label}</button>)}
+          {([
+            ['housing', t('住宅', 'Houses')],
+            ['walls', t('城墙', 'Walls')],
+            ['roads', t('阶梯朝圣街道', 'Stepped street')],
+            ['labels', t('标注', 'Labels')],
+            ['shadows', t('阴影', 'Shadows')],
+          ] as const).map(([key, label]) => (
+            <button
+              key={key}
+              aria-pressed={layers[key]}
+              className={layers[key] ? 'on' : ''}
+              onClick={() => setLayers((v) => ({ ...v, [key]: !v[key] }))}
+            >
+              <i />{label}
+            </button>
+          ))}
         </div>
         <details className="city-method">
           <summary>{t('重建依据与不确定性', 'Reconstruction and uncertainty')}</summary>
