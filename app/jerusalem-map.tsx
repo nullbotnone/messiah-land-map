@@ -11,6 +11,10 @@ type Lang = 'hans' | 'hant' | 'en';
 type Viewer = { focus: (site?: JerusalemSite) => void; zoom: (factor: number) => void; north: () => void; top: () => void };
 type Layers = { housing: boolean; walls: boolean; roads: boolean; labels: boolean };
 
+/** The city view is unmounted when the reader goes back to the regional map, so
+ * the chosen site is kept here rather than lost with the WebGL context. */
+let lastSelected = 'temple';
+
 /** Ground under a site — the esplanade itself for anything standing on it. */
 const siteGround = (site: { x: number; z: number; onPlatform?: boolean }) =>
   site.onPlatform ? PLATFORM.top : cityGround(site.x, site.z);
@@ -21,8 +25,8 @@ export default function JerusalemMap({ lang, onReturn }: { lang: Lang; onReturn:
   const labelRefs = useRef(new Map<string, HTMLElement>());
   const viewer = useRef<Viewer | null>(null);
   const layersRef = useRef<ReturnType<typeof buildJerusalemScene> | null>(null);
-  const selectedRef = useRef('temple');
-  const [selected, setSelected] = useState('temple');
+  const selectedRef = useRef(lastSelected);
+  const [selected, setSelected] = useState(lastSelected);
   const [layers, setLayers] = useState<Layers>({ housing: true, walls: true, roads: true, labels: true });
   const [failed, setFailed] = useState(false);
   const active = jerusalemSites.find((s) => s.id === selected)!;
@@ -93,7 +97,7 @@ export default function JerusalemMap({ lang, onReturn }: { lang: Lang; onReturn:
         const y = (1 - position.y) / 2 * el.clientHeight;
         const w = button.offsetWidth || 120, h = 30;
         const collision = taken.some((b) => Math.abs(x - b.x) < (w + b.w) / 2 + 6 && Math.abs(y - b.y) < (h + b.h) / 2 + 6);
-        const visible = position.z > -1 && position.z < 1 && x > 20 && x < el.clientWidth - 20 && y > 10 && y < el.clientHeight - 10 && !collision;
+        const visible = position.z > -1 && position.z < 1 && x > w / 2 + 6 && x < el.clientWidth - w / 2 - 6 && y > 10 && y < el.clientHeight - 10 && !collision;
         button.style.left = `${x}px`; button.style.top = `${y}px`;
         button.style.visibility = visible ? 'visible' : 'hidden';
         if (visible) taken.push({ x, y, w, h });
@@ -190,6 +194,7 @@ export default function JerusalemMap({ lang, onReturn }: { lang: Lang; onReturn:
 
   useEffect(() => {
     selectedRef.current = selected;
+    lastSelected = selected;
     // A small zoom of 1 redraws the highlight and labels without moving the view.
     viewer.current?.zoom(1);
   }, [selected, lang]);

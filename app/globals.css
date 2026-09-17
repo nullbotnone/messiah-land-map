@@ -177,6 +177,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--gold-bright); o
 .map-hint span { color: var(--gold); font-size: 14px; margin-right: 5px; }
 .story-panel {
   position: absolute; top: 42px; right: clamp(24px, 4vw, 62px); z-index: 300; width: min(335px, calc(100% - 48px));
+  max-height: calc(100% - 84px); overflow: auto; scrollbar-width: thin;
   padding: 38px 35px 25px; border: 1px solid rgba(208, 183, 124, .22);
   background: linear-gradient(155deg, rgba(17, 33, 33, .97), rgba(7, 18, 20, .97));
   box-shadow: 0 28px 80px rgba(0,0,0,.46); cursor: auto;
@@ -211,15 +212,14 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--gold-bright); o
 .panel-nav div { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; }
 .panel-nav i { flex: none; width: 4px; height: 4px; border-radius: 50%; background: #3e4a46; }
 .panel-nav i.active { background: var(--gold); }
-.guide { padding: 40px clamp(24px, 8vw, 130px) 44px; background: #ece7db; color: #17201c; }
+.sources-dialog { width: min(760px, calc(100vw - 40px)); padding: 46px clamp(24px, 4vw, 54px) 40px; border: 0; background: #ece7db; color: #17201c; }
+.sources-dialog::backdrop { background: rgba(4, 12, 14, .72); }
+.close-sources { position: absolute; top: 16px; right: 18px; width: 30px; height: 30px; border: 1px solid rgba(34,48,40,.2); background: transparent; color: #4b544e; font-size: 16px; line-height: 1; cursor: pointer; }
+.close-sources:hover { background: rgba(34,48,40,.07); }
 .source-note { display: flex; justify-content: space-between; gap: 40px; margin: 0; color: #81877e; font-size: 9px; letter-spacing: .08em; }
 .source-note p { max-width: 730px; margin: 0; line-height: 1.8; }
 .source-note div { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 16px; }
 .source-note a { color: #7c6331; white-space: nowrap; border-bottom: 1px solid rgba(124,99,49,.25); }
-footer { height: 92px; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; padding: 0 clamp(24px, 5vw, 82px); background: #061013; border-top: 1px solid var(--line); }
-footer span { font: 15px Georgia, "Songti SC", serif; letter-spacing: .16em; }
-footer p, footer a { color: #66716d; font-size: 9px; letter-spacing: .13em; }
-footer a { justify-self: end; }
 
 @media (max-width: 900px) {
   .topbar { grid-template-columns: 1fr auto; }
@@ -236,8 +236,6 @@ footer a { justify-self: end; }
   .view-tools, .compass, .map-hint { display: none; }
   .source-note { flex-direction: column; gap: 18px; }
   .source-note div { justify-content: flex-start; }
-  footer { grid-template-columns: 1fr auto; }
-  footer p { display: none; }
 }
 
 @media (max-width: 540px) {
@@ -255,8 +253,7 @@ footer a { justify-self: end; }
   .marker-label b { font-size: 10px; }
   .filter-bar { width: calc(100% - 28px); justify-content: space-between; }
   .filter-bar button { padding: 9px 7px; }
-  .guide { padding: 34px 25px 40px; }
-}
+  }
 
 @media (prefers-reduced-motion: reduce) {
   * { scroll-behavior: auto !important; transition-duration: .01ms !important; }
@@ -361,3 +358,12 @@ footer a { justify-self: end; }
 .video-frame { display: block; width: 100%; aspect-ratio: 16 / 9; border: 1px solid rgba(202,170,96,.26); }
 .video-credit { display: block; margin-top: 8px; color: #6f7b74; font-size: 8px; letter-spacing: .1em; }
 .video-credit:hover { color: var(--gold); }
+
+/* The map is the page, and its own wheel handling means anything pushed below
+   the fold cannot be scrolled to. So on a desktop window the section is exactly
+   one screen and the stage takes whatever the topbar and the mode bar leave. */
+@media (min-width: 901px) {
+  .map-section { display: flex; flex-direction: column; height: 100svh; box-sizing: border-box; }
+  .map-stage, .city-map { flex: 1; min-height: 420px; height: auto; }
+  .city-viewer, .city-sidebar { height: auto; min-height: 0; }
+}

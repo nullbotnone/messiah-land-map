@@ -295,6 +295,7 @@ export default function Home() {
   const [showRegions, setShowRegions] = useState(true);
   const [showTowns, setShowTowns] = useState(true);
   const [panelOpen, setPanelOpen] = useState(true);
+  const sourcesRef = useRef<HTMLDialogElement>(null);
   /**
    * Nothing is requested from YouTube until this is set. An iframe per panel
    * would pull a player, its cookies and a few hundred kilobytes on every
@@ -497,8 +498,7 @@ const hits = (a: Box, b: Box) => a.x0 < b.x1 && a.x1 > b.x0 && a.y0 < b.y1 && a.
         </a>
         <div className="era"><span /> 公元 30 年左右</div>
         <nav aria-label="主导航">
-          <a href="#map">探索地图</a>
-          <a className="about-button" href="#sources">资料来源</a>
+          <button className="about-button" onClick={() => sourcesRef.current?.showModal()}>资料来源</button>
           <div className="script-toggle" data-no-convert role="group" aria-label="语言 / Language">
             {LANGS.map(([code, label]) => (
               <button
@@ -693,8 +693,9 @@ const hits = (a: Box, b: Box) => a.x0 < b.x1 && a.x1 > b.x0 && a.y0 < b.y1 && a.
         </div>
       </section>
 
-      <section className="guide">
-        <div className="source-note" id="sources">
+      <dialog className="sources-dialog" ref={sourcesRef} onClick={(e) => { if (e.target === sourcesRef.current) sourcesRef.current?.close(); }}>
+        <button className="close-sources" onClick={() => sourcesRef.current?.close()} aria-label="关闭资料来源">×</button>
+        <div className="source-note">
           <p>
             高程：GMRT 全球多分辨率地形合成数据集，按 0.005°（约 550 米）网格重采样，共 {'290,891'} 个采样点，由 GMRT 网格服务一次取得。
             海岸线、加利利海、死海与约旦河等河道中心线：Natural Earth 10m 物理矢量。
@@ -707,9 +708,7 @@ const hits = (a: Box, b: Box) => a.x0 < b.x1 && a.x1 > b.x0 && a.y0 < b.y1 && a.
             <a href="https://www.naturalearthdata.com/downloads/10m-physical-vectors/" target="_blank" rel="noreferrer">Natural Earth ↗</a>
           </div>
         </div>
-      </section>
-
-      <footer><span>弥赛亚之地</span><p>以地理为线索 · 重读福音书</p><a href="#map">回到地图 ↑</a></footer>
+      </dialog>
     </main>
   );
 }
