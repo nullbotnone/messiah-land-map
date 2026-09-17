@@ -30,6 +30,32 @@ export function buildJerusalemScene() {
     parent.add(mesh);
     return mesh;
   }
+  /** A masonry arch with a true opening, rather than a solid block that only
+   * reads correctly from one angle. The opening is a semicircle above straight
+   * jambs; the mesh can be turned so its span follows either axis of the city. */
+  function archWall(parent: THREE.Object3D, x: number, y: number, z: number, span: number, rise: number, height: number, depth: number, color: THREE.ColorRepresentation = darkStone, rotY = 0, thickness = 2.4) {
+    const outer = new THREE.Shape();
+    const half = span / 2 + thickness;
+    outer.moveTo(-half, 0); outer.lineTo(half, 0); outer.lineTo(half, height); outer.lineTo(-half, height); outer.closePath();
+    const opening = new THREE.Path();
+    const spring = Math.min(height - rise, height - 0.2);
+    // Holes must wind opposite the outer rectangle for ExtrudeGeometry to keep
+    // the opening through the full depth.
+    opening.moveTo(-span / 2, 0); opening.lineTo(-span / 2, spring);
+    opening.absarc(0, spring, span / 2, Math.PI, 0, true);
+    opening.lineTo(span / 2, 0); opening.closePath();
+    outer.holes.push(opening);
+    const geometry = new THREE.ExtrudeGeometry(outer, { depth, bevelEnabled: false, curveSegments: 24 });
+    geometry.translate(0, 0, -depth / 2);
+    const mesh = new THREE.Mesh(geometry, mat(color));
+    mesh.userData.modelPart = 'arch';
+    mesh.position.set(x, y, z); mesh.rotation.y = rotY;
+    parent.add(mesh);
+    return mesh;
+  }
+  function cap(parent: THREE.Object3D, x: number, y: number, z: number, w: number, d: number, color: THREE.ColorRepresentation = '#c1b394', rotY = 0) {
+    return box(parent, x, y, z, w, 0.8, d, color, rotY);
+  }
   function instances(parent: THREE.Object3D, geometry: THREE.BufferGeometry, color: THREE.ColorRepresentation, transforms: number[][]) {
     const mesh = new THREE.InstancedMesh(geometry, mat(color), transforms.length);
     const dummy = new THREE.Object3D();
@@ -167,13 +193,19 @@ export function buildJerusalemScene() {
     roof(nw2, [sw2[0], sw2[1] - 36]);
     roof(ne2, [se2[0], se2[1] - 36]);
   }
-  // The Royal Stoa: 280 m of basilica on the southern wall, four rows of columns,
-  // a nave half again as high as its aisles, 162 columns in all.
-  for (const [z, height] of [[SOUTH - 5, 15], [SOUTH - 14, 30], [SOUTH - 28, 30], [SOUTH - 33, 15]]) {
+  // The Royal Stoa: Josephus describes four parallel rows of columns making
+  // three aisles. The two side aisles are about 15 m high, while the middle
+  // aisle is twice as high; the 162-column count is retained as the literary
+  // total even though the exact end-bay arrangement is debated.
+  for (const [z, height] of [[SOUTH - 5, 15], [SOUTH - 15, 30], [SOUTH - 30, 30], [SOUTH - 40, 15]]) {
     colonnade(royal, WEST + 5, z, EAST - 5, z, PLATFORM.top, height, 7, 0.75);
   }
-  box(royal, -6, PLATFORM.top + 30, SOUTH - 21, 268, 3, 18, '#cbbb9a');
-  for (const z of [SOUTH - 9.5, SOUTH - 30.5]) box(royal, -6, PLATFORM.top + 15, z, 268, 2.5, 13, '#c5b593');
+  // Separate roof slabs keep the basilica's three aisles legible from above.
+  box(royal, -6, PLATFORM.top + 30, SOUTH - 22.5, 268, 3, 15, '#cbbb9a');
+  for (const z of [SOUTH - 10, SOUTH - 35]) box(royal, -6, PLATFORM.top + 15, z, 268, 2.5, 10, '#c5b593');
+  // The fourth row is engaged in the southern retaining wall, not a free row
+  // standing in the open court. A low ashlar beam makes that relationship clear.
+  box(royal, -6, PLATFORM.top + 7, SOUTH - 43, 268, 2.4, 2.2, '#b9aa88');
 
   // ---- The inner precinct, in cubits ---------------------------------------
   // Mishnah Middot measures the whole enclosure, and every number below is its
@@ -343,40 +375,79 @@ export function buildJerusalemScene() {
   box(temple, porch.east + 0.5, porchFloor + cu(40), axis, 1.8, cu(5), cu(26), gold);
   box(temple, porch.west + 0.3, porchFloor, axis, 1.2, cu(20), cu(10), '#4a4029');
 
-  // Huldah gates and the monumental stair, on the southern wall.
+  // Huldah gates and the monumental stair, on the southern wall. Archaeology
+  // records low risers and alternating shallow/deep treads, not a steep ramp.
   const [fx, fz] = platformToWorld(-67, SOUTH + 34);
   const foot = cityGround(fx, fz);
-  const threshold = foot + 12; // the gates open a dozen metres above the street
+  const threshold = foot + 7; // the gate mouths are below the upper esplanade
   for (const [x, w] of [[-67, 13], [38, 15]]) box(royal, x, threshold, SOUTH - 1.75, w, 11, 3, '#413d31');
+  let stairZ = SOUTH + 36;
   for (let i = 0; i < 30; i++) {
-    box(royal, -67, foot + (threshold - foot) * i / 30, SOUTH + 34 - i * 1.13, 64, 0.6, 2.2, '#cabf9f');
+    const tread = i % 2 === 0 ? 0.9 : 0.45;
+    const nextZ = stairZ - tread;
+    const y = foot + (threshold - foot) * (i + 1) / 30;
+    box(royal, -15, y - 0.22, (stairZ + nextZ) / 2, 64, 0.45, tread + 0.08, '#cabf9f');
+    stairZ = nextZ;
   }
-  box(royal, -67, foot - 1, SOUTH + 36, 64, 1.2, 8, '#c3b898'); // the landing the street runs onto
+  box(royal, -15, foot - 1, SOUTH + 37, 64, 1.2, 8, '#c3b898'); // the landing the street runs onto
+  // A central divider reflects the two processional approaches to the Double
+  // and Triple Gates while keeping the broad southern stair visually unified.
+  box(royal, 3, foot, SOUTH + 26, 1.2, 0.8, 18, '#b7aa8c');
 
-  // Robinson's Arch: a 15 m span carrying a stair down to the valley street.
+  // Robinson's Arch: the surviving dimensions are about 15.2 m long, 12.9 m
+  // across and 17.5 m above the ancient street. The span is modeled as an open
+  // arch over the street, with the eastern side integrated into the retaining
+  // wall and the western pier carrying the stair.
   const robinson = site('robinson', mount);
-  box(robinson, WEST - 8, 121, 228, 16, 17, 15, darkStone);
-  box(robinson, WEST - 8, PLATFORM.top - 2, 228, 17, 2.5, 16, '#cdc4ab');
-  for (let i = 0; i < 12; i++) box(robinson, WEST - 14, 121 + i * 1.6, 228 + i * 2.2, 5, 1.6, 2.4, '#cabf9f');
-  for (let i = 0; i < 5; i++) box(robinson, WEST - 4 - i * 6, 119, 244, 5, 5.5, 8, '#bdb090'); // the street-front shops
+  const robinsonStreet = cityGround(...platformToWorld(WEST - 8, 244));
+  archWall(robinson, WEST - 8, robinsonStreet, 228, 12.9, 7.5, 17.5, 15.2, darkStone, 0, 3.6);
+  box(robinson, WEST - 8, PLATFORM.top - 1.2, 228, 15.2, 2.4, 15.2, '#cdc4ab');
+  // The stair climbs over the arch from the valley side to the gate. A broad
+  // landing at the crown and low side parapets keep the 15 m-wide scale clear.
+  let robinsonZ = 250;
+  for (let i = 0; i < 26; i++) {
+    const nextZ = robinsonZ - 0.9;
+    const y = robinsonStreet + (PLATFORM.top - robinsonStreet) * (i + 1) / 26;
+    box(robinson, WEST - 8, y - 0.18, (robinsonZ + nextZ) / 2, 15.2, 0.36, 0.98, '#cabf9f');
+    robinsonZ = nextZ;
+  }
+  cap(robinson, WEST - 8, PLATFORM.top + 1.2, 226, 18, 18, '#c6b99a');
+  // Seven smaller vaults supported the turning flights west/south of the main
+  // arch. They are deliberately lower than the main span: this is the
+  // excavated stair system, not a second bridge of equal size.
+  for (let i = 0; i < 7; i++) {
+    const x = WEST - 18 - i * 5.2;
+    const y = robinsonStreet - 1.5 + i * 0.8;
+    archWall(robinson, x, y, 247, 3.8, 2.2, 7 + i * 0.8, 4.4, '#b4a889', Math.PI / 2, 1.1);
+  }
+  for (let i = 0; i < 5; i++) box(robinson, WEST - 4 - i * 6, robinsonStreet - 0.3, 238, 5, 5.5, 8, '#bdb090'); // street-front shops
 
   // ---- Everything else, in world coordinates ------------------------------
-  // Wilson's Arch and the bridge west to the Xystus.
-  // The bridge runs west from the wall until the Upper City's slope comes up to
-  // meet its deck; the Xystus and the council chamber stand on that ground.
+  // Wilson's Arch and the bridge west to the Xystus. The IAA report gives the
+  // eastern arch a 14.8 m north/south length, a 12.8 m diameter and a 6.4 m
+  // rise. Westward, the Great Causeway is about 11 m wide and is made of two
+  // rows of narrower vaults; the old solid piers hid that structure.
   const wilson = site('wilson');
   const deck = PLATFORM.top - 2;
   let abutment = -112;
   while (abutment > -360 && cityGround(abutment, 104 + (-112 - abutment) * 0.14) < deck - 3) abutment -= 8;
-  for (let x = -112; x > abutment; x -= 17) {
+  const wilsonStreet = cityGround(-112, 104);
+  archWall(wilson, -112, wilsonStreet, 104, 12.8, 6.4, 13.2, 14.8, darkStone, Math.PI / 2, 2.8);
+  box(wilson, -112, deck, 104, 14.8, 2.5, 12.8, '#cdc4ab');
+  for (const z of [97.3, 110.7]) cap(wilson, -112, deck + 1.25, z, 2.2, 4, '#b9aa88', Math.PI / 2);
+  for (let x = -126; x > abutment; x -= 14) {
     const z = 104 + (-112 - x) * 0.14;
     const y = cityGround(x, z);
-    box(wilson, x, y, z, 14, deck - y, 16, '#c3b696');
+    // Two parallel rows of arch ribs, not a line of rectangular columns.
+    archWall(wilson, x, y, z - 2.75, 5.2, 2.8, Math.max(6.2, deck - y), 5.0, '#c3b696', 0, 1.1);
+    archWall(wilson, x, y, z + 2.75, 5.2, 2.8, Math.max(6.2, deck - y), 5.0, '#c3b696', 0, 1.1);
   }
-  box(wilson, (abutment - 112) / 2, deck, 104 + (-112 - abutment) * 0.07, -112 - abutment, 2.5, 18, '#cdc4ab');
+  box(wilson, (abutment - 112) / 2, deck, 104 + (-112 - abutment) * 0.07, -112 - abutment, 2.5, 11, '#cdc4ab');
   const xy = cityGround(abutment - 40, 128);
-  box(wilson, abutment - 40, xy, 128, 74, 2, 78, '#c9c0a6'); // the Xystus
-  box(wilson, abutment - 46, xy + 2, 96, 34, 9, 26, '#cbc1a4'); // the council chamber
+  box(wilson, abutment - 40, xy, 128, 74, 1.2, 58, '#c9c0a6'); // the schematic Xystus court
+  for (const z of [100, 156]) box(wilson, abutment - 40, xy + 1.2, z, 74, 1.4, 1.8, '#b3a486');
+  for (const x of [abutment - 72, abutment - 8]) box(wilson, x, xy + 1.2, 128, 1.8, 1.4, 58, '#b3a486');
+  box(wilson, abutment - 46, xy + 1.2, 112, 34, 8, 24, '#cbc1a4'); // schematic civic hall
 
   // The Antonia, on its own rock north-west of the enclosure.
   const antonia = site('antonia', mount);

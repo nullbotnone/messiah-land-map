@@ -73,6 +73,13 @@ city.landmarks.traverse((obj) => { if (obj.userData.siteId) landmarkIds.push(obj
 for (const id of ['temple', 'royal-stoa', 'robinson', 'wilson', 'antonia', 'palace', 'bethesda', 'siloam', 'gihon', 'golgotha', 'gethsemane', 'kidron-tombs', 'upper', 'hinnom']) {
   assert.ok(landmarkIds.includes(id), `no geometry carries the site id ${id}`);
 }
+for (const id of ['robinson', 'wilson']) {
+  let siteGroup;
+  city.landmarks.traverse((obj) => { if (obj.userData.siteId === id) siteGroup = obj; });
+  let hasArch = false;
+  siteGroup?.traverse((obj) => { if (obj.userData.modelPart === 'arch') hasArch = true; });
+  assert.ok(hasArch, `${id} must contain an open arch mesh`);
+}
 // Nothing may sprawl past the footprint of the thing it represents. A beam laid
 // across its own colonnade, or a bridge deck measured from the wrong end, shows
 // up here as a long block on the map long before anyone can name it.
