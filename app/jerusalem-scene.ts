@@ -54,7 +54,7 @@ export function buildJerusalemScene() {
       columns.push([x, y + height / 2, z, radius, height, radius]);
       box(parent, x, y + height - 0.8, z, radius * 2.6, 1, radius * 2.6, '#c1b394');
     }
-    box(parent, (x1 + x2) / 2, y + height, (z1 + z2) / 2, length + radius * 4, 2.4, radius * 3.6, '#c0af8b', Math.atan2(x2 - x1, z2 - z1));
+    box(parent, (x1 + x2) / 2, y + height, (z1 + z2) / 2, radius * 3.6, 2.4, length + radius * 4, '#c0af8b', Math.atan2(x2 - x1, z2 - z1));
   }
 
   const bounds = JERUSALEM_BOUNDS;
@@ -107,7 +107,6 @@ export function buildJerusalemScene() {
     for (let y = 96; y < PLATFORM.top; y += 2.6) courses.push([(ax + bx) / 2, y, (az + bz) / 2, 1, 1.5, length, rot]);
   }
   instances(mount, boxGeometry, '#8d8368', courses);
-  box(mount, 0, PLATFORM.top, 0, 320, 1.2, 500, '#dbd1b9');
 
   // Double porticoes round the outer court; the eastern one is Solomon's Portico.
   const NORTH = -236, SOUTH = 240, WEST = -150, EAST = 150;
@@ -182,7 +181,7 @@ export function buildJerusalemScene() {
     const y = cityGround(x, z);
     box(wilson, x, y, z, 14, deck - y, 16, '#c3b696');
   }
-  box(wilson, (abutment - 112) / 2, deck, 104 + (-112 - abutment) * 0.07, 112 - abutment, 2.5, 18, '#cdc4ab');
+  box(wilson, (abutment - 112) / 2, deck, 104 + (-112 - abutment) * 0.07, -112 - abutment, 2.5, 18, '#cdc4ab');
   const xy = cityGround(abutment - 40, 128);
   box(wilson, abutment - 40, xy, 128, 74, 2, 78, '#c9c0a6'); // the Xystus
   box(wilson, abutment - 46, xy + 2, 96, 34, 9, 26, '#cbc1a4'); // the council chamber

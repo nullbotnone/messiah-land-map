@@ -138,7 +138,9 @@ are released when leaving the city; rendering stops once controls settle.
 `npm run check:jerusalem` validates site/source coverage, generated geometry
 and the rendering budget; that the modelled ground matches twelve measured
 elevations within 15 m and the retaining walls their published lengths within
-12 m; and that the wall/site relationships the reconstruction rests on hold —
+12 m; that no landmark sprawls past the footprint of the thing it represents,
+which is how a beam laid across its own colonnade shows up before anyone sees
+it; and that the wall/site relationships the reconstruction rests on hold —
 Golgotha outside both walls, Siloam and the palace inside the first.
 
 The map follows Google Earth, so the gestures transfer without being learned:

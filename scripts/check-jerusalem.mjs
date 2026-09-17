@@ -2,6 +2,7 @@
 // the relationships the reconstruction rests on, and finite mesh data.
 import assert from 'node:assert/strict';
 import { registerHooks } from 'node:module';
+import * as THREE from 'three';
 registerHooks({ resolve: (spec, ctx, next) => next(spec.startsWith('.') && !/\.[a-z]+$/.test(spec) ? `${spec}.ts` : spec, ctx) });
 const { jerusalemSites, SOURCES, cityGround, platformToWorld, PLATFORM, FIRST_WALL, SECOND_WALL, PILGRIM_ROAD, JERUSALEM_BOUNDS, insidePolygon } = await import('../app/jerusalem-data.ts');
 const { buildJerusalemScene, disposeJerusalem } = await import('../app/jerusalem-scene.ts');
@@ -72,6 +73,23 @@ city.landmarks.traverse((obj) => { if (obj.userData.siteId) landmarkIds.push(obj
 for (const id of ['temple', 'royal-stoa', 'robinson', 'wilson', 'antonia', 'palace', 'bethesda', 'siloam', 'gihon', 'golgotha', 'gethsemane', 'kidron-tombs', 'upper', 'hinnom']) {
   assert.ok(landmarkIds.includes(id), `no geometry carries the site id ${id}`);
 }
+// Nothing may sprawl past the footprint of the thing it represents. A beam laid
+// across its own colonnade, or a bridge deck measured from the wrong end, shows
+// up here as a long block on the map long before anyone can name it.
+city.root.updateMatrixWorld(true);
+const footprints = { palace: 340, 'royal-stoa': 300, temple: 250, wilson: 210, antonia: 180, gethsemane: 160, hinnom: 130, bethesda: 130, 'kidron-tombs': 100, bezetha: 100, golgotha: 100, siloam: 90, upper: 60, robinson: 60, gihon: 40 };
+const spans = new Map();
+city.landmarks.traverse((obj) => {
+  if (!obj.userData.siteId) return;
+  const size = new THREE.Box3().setFromObject(obj).getSize(new THREE.Vector3());
+  spans.set(obj.userData.siteId, Math.max(spans.get(obj.userData.siteId) ?? 0, size.x, size.z));
+});
+for (const [id, limit] of Object.entries(footprints)) {
+  const span = spans.get(id);
+  assert.ok(span !== undefined, `no geometry carries the site id ${id}`);
+  assert.ok(span <= limit, `${id} spreads over ${span.toFixed(0)} m, more than the ${limit} m it should occupy`);
+}
+
 let vertices = 0;
 city.root.traverse((obj) => {
   if (!obj.isMesh) return;
