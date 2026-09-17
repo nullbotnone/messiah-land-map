@@ -73,6 +73,73 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--gold-bright); o
 .hero-note p { margin: 0; padding-left: 17px; border-left: 1px solid var(--line); color: #757f7c; font-size: 10px; line-height: 1.8; letter-spacing: .08em; }
 
 .map-section { background: #061014; padding: 0; }
+.map-stage[hidden] { display: none; }
+.map-mode-bar { display: flex; align-items: center; gap: 15px; padding: 18px clamp(20px, 5vw, 76px); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.map-mode-bar button { padding: 10px 14px; border: 1px solid transparent; background: transparent; font-size: 12px; cursor: pointer; color: var(--muted); }
+.map-mode-bar button.active { color: var(--gold-bright); border-color: #c8a75d55; background: #c8a75d0c; }
+.map-mode-bar > span { color: #6b7771; }
+.map-mode-bar small { margin-left: auto; color: #79867e; font-size: 10px; }
+.city-entry { display: flex; width: 100%; justify-content: space-between; padding: 13px 14px; margin: 16px 0; color: var(--gold-bright); background: #c8a75d16; border: 1px solid #c8a75d55; cursor: pointer; font-size: 12px; }
+.city-loading { display: grid; place-items: center; min-height: 700px; color: var(--gold); }
+.city-map { display: grid; grid-template-columns: minmax(0, 1fr) 340px; background: #081619; }
+.city-viewer { position: relative; min-width: 0; height: max(790px, 94svh); overflow: hidden; }
+.city-canvas-host { position: absolute; inset: 0; outline-offset: -4px; }
+.city-canvas-host canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+.city-heading { position: absolute; left: 32px; top: 30px; z-index: 2; pointer-events: none; }
+.city-heading > span { color: var(--gold); font: 9px/1.5 Arial, sans-serif; letter-spacing: .27em; }
+.city-heading h2 { font: 36px/1.2 Georgia, 'Songti SC', serif; margin: 10px 0; }
+.city-heading h2 em { color: var(--gold); font: 16px Georgia, serif; padding-left: 6px; }
+.city-heading p { font-size: 11px; color: #8e9a8f; margin: 0; }
+.city-tools { position: absolute; top: 28px; right: 22px; display: flex; flex-direction: column; gap: 6px; z-index: 4; }
+.city-tools button { width: 46px; min-height: 40px; cursor: pointer; border: 1px solid var(--line); background: #09171bd9; color: #d4c8ac; font-size: 12px; backdrop-filter: blur(8px); }
+.city-tools button:hover { background: #25352e; border-color: var(--gold); }
+.city-north-arrow { display: inline-block; color: var(--gold-bright); }
+.city-labels { position: absolute; inset: 0; pointer-events: none; }
+.city-label { position: absolute; visibility: hidden; transform: translate(-50%, -100%); color: #eee4cd; background: #071619c9; border: 1px solid #c8a75d40; border-left: 2px solid #c8a75d80; padding: 6px 9px; font-size: 10px; cursor: pointer; pointer-events: auto; white-space: nowrap; backdrop-filter: blur(5px); }
+.city-label.active { color: #f6d895; background: #142725e8; border-color: var(--gold); z-index: 2; }
+.city-landform-label { color: #ccd3c1; border: 0; background: #10272070; font-style: italic; letter-spacing: .12em; pointer-events: none; }
+.city-terrain-key { position: absolute; left: 30px; right: 80px; bottom: 68px; display: flex; flex-direction: column; gap: 9px; pointer-events: none; }
+.city-terrain-key b { font-size: 10px; font-weight: 400; color: #c5b992; }
+.city-terrain-key span { font-size: 9px; color: #829088; }
+.city-gesture { position: absolute; left: 30px; bottom: 25px; right: 30px; margin: 0; color: #83918a; font-size: 10px; pointer-events: none; }
+.city-sidebar { padding: 24px; height: max(790px, 94svh); overflow: auto; border-left: 1px solid var(--line); background: #0a171a; scrollbar-width: thin; scrollbar-color: #37473a #0a171a; }
+.city-return { padding: 0 0 17px; border: 0; background: none; font-size: 11px; color: var(--gold); cursor: pointer; }
+.city-era { border-top: 1px solid var(--line); padding-top: 16px; font-size: 10px; color: #8c988c; letter-spacing: .08em; }
+.city-site-list { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin: 20px 0 24px; }
+.city-site-list button { display: flex; align-items: center; gap: 6px; min-height: 42px; border: 1px solid transparent; background: #f2eadb03; text-align: left; padding: 8px; font-size: 10px; color: #a5afa2; cursor: pointer; }
+.city-site-list button small { color: #607164; font: 9px Georgia, serif; }
+.city-site-list button span { margin-left: auto; color: #6a7a66; }
+.city-site-list button.active { border-color: #c8a75d55; color: var(--gold-bright); background: #c8a75d0d; }
+.city-detail { border-top: 1px solid var(--line); padding-top: 20px; }
+.city-detail > span { font-size: 9px; color: var(--gold); line-height: 1.8; }
+.city-detail h3 { font: 25px/1.3 Georgia, 'Songti SC', serif; margin: 11px 0 13px; }
+.city-detail p { font-size: 12px; line-height: 1.95; color: #a8b0a3; margin: 0 0 14px; }
+.city-reference { font: 10px/1.8 Georgia, serif; color: #91a191; display: block; }
+.city-focus { display: flex; width: 100%; justify-content: space-between; background: #c8a75d18; color: var(--gold-bright); border: 1px solid #c8a75d40; font-size: 11px; padding: 11px 13px; margin-top: 16px; cursor: pointer; }
+.city-source-links { display: flex; flex-direction: column; gap: 9px; margin-top: 16px; }
+.city-source-links a, .city-method > a { font: 10px/1.6 Arial, sans-serif; color: #8d9b86; text-decoration: underline; text-decoration-color: #8d9b8640; text-underline-offset: 3px; }
+.city-source-links a:hover, .city-method > a:hover { color: var(--gold-bright); }
+.city-layers { display: flex; flex-wrap: wrap; gap: 6px; padding: 21px 0; }
+.city-layers button { border: 1px solid var(--line); background: transparent; padding: 8px; font-size: 10px; color: #738275; cursor: pointer; }
+.city-layers button i { display: inline-block; width: 5px; height: 5px; margin-right: 6px; border: 1px solid #738275; border-radius: 50%; }
+.city-layers button.on { color: #d6c38c; }.city-layers button.on i { background: var(--gold); border-color: var(--gold); }
+.city-method { border-top: 1px solid var(--line); padding-top: 15px; }.city-method summary { cursor: pointer; font-size: 11px; color: #a8ad9a; line-height: 1.8; }
+.city-method p { font-size: 11px; line-height: 1.9; color: #879381; }.city-method > a { display: block; margin-top: 10px; }
+.city-wall-key { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; font-size: 9px; line-height: 1.8; color: #a49e83; }
+.city-wall-key i { width: 20px; border-top: 2px solid #b9ad91; }.city-wall-key i.inferred { border-top-style: dashed; border-color: #ad956c; }
+.city-fallback { position: absolute; top: 35%; left: 15%; right: 15%; background: #0a171aec; border: 1px solid var(--line); padding: 24px; font-size: 14px; line-height: 1.8; }
+.city-fallback button { background: transparent; border: 1px solid var(--line); padding: 10px; cursor: pointer; }
+@media (max-width: 900px) {
+  .city-map { grid-template-columns: 1fr; }.city-viewer { height: 72svh; min-height: 570px; }.city-sidebar { height: auto; overflow: visible; border-left: 0; border-top: 1px solid var(--line); }
+  .city-site-list { grid-template-columns: repeat(5, 1fr); }.city-heading { left: 20px; top: 22px; }.city-tools { top: 20px; right: 16px; }
+  .city-terrain-key, .city-gesture { left: 20px; }.city-terrain-key { bottom: 75px; }.city-detail { max-width: 660px; }
+}
+@media (max-width: 540px) {
+  .map-mode-bar { gap: 5px; padding: 12px; }.map-mode-bar button { padding: 10px; font-size: 11px; }.map-mode-bar small { display: none; }
+  .city-viewer { height: 72svh; min-height: 570px; }.city-heading h2 { font-size: 28px; }.city-heading p { font-size: 10px; }
+  .city-site-list { grid-template-columns: 1fr 1fr; }.city-terrain-key { right: 30px; }.city-terrain-key b, .city-terrain-key span { font-size: 8px; line-height: 1.7; }
+  .city-gesture { font-size: 9px; line-height: 1.8; }.city-sidebar { padding: 22px; }.city-label { font-size: 9px; padding: 5px 7px; }
+}
 .map-stage {
   position: relative; height: max(720px, 100svh); min-height: 680px; overflow: hidden;
   touch-action: none; cursor: grab;

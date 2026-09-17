@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { places, themes, type Place, type ThemeFilter } from './places';
 import { regionLabels, regions, peaks, lakes } from './geo';
 import { toTraditional } from './zh-hant';
@@ -10,6 +10,8 @@ import {
   clamp, clampPan, DRAFT_STRIDE, drawScene, elevationRange, groundAt, hypsometric, makeFrame,
   normLat, normLon, project, regionAt, relief, RULER_TINT, TILT, zoomAbout, type Frame, type View,
 } from './terrain';
+
+const JerusalemMap = lazy(() => import('./jerusalem-map'));
 
 const RULERS: { key: keyof typeof RULER_TINT; name: string; note: string }[] = [
   { key: 'antipas', name: '希律安提帕', note: '加利利 · 比利亚' },
@@ -286,6 +288,7 @@ function Compass({ rotation, onReset }: { rotation: number; onReset: () => void 
 }
 
 export default function Home() {
+  const [mapMode, setMapMode] = useState<'israel' | 'jerusalem'>('israel');
   const [activeId, setActiveId] = useState('jerusalem');
   const [filter, setFilter] = useState<ThemeFilter>('全部');
   const [view, setView] = useState<View>(DEFAULT_VIEW);
@@ -462,6 +465,7 @@ const hits = (a: Box, b: Box) => a.x0 < b.x1 && a.x1 > b.x0 && a.y0 < b.y1 && a.
 
     // Labels read by assistive technology follow the visible script too.
     for (const el of document.querySelectorAll('[aria-label]:not([data-no-convert])')) {
+      if (el.closest('[data-no-convert]')) continue;
       swap(el, () => el.getAttribute('aria-label') ?? '', (value) => el.setAttribute('aria-label', value));
     }
   });
@@ -524,8 +528,18 @@ const hits = (a: Box, b: Box) => a.x0 < b.x1 && a.x1 > b.x0 && a.y0 < b.y1 && a.
       </section>
 
       <section className="map-section" id="map" aria-label="耶稣时代以色列互动地图">
+        <div className="map-mode-bar" role="group" aria-label="地图尺度">
+          <button aria-pressed={mapMode === 'israel'} className={mapMode === 'israel' ? 'active' : ''} onClick={() => setMapMode('israel')}>以色列地形图</button>
+          <span>↔</span>
+          <button aria-pressed={mapMode === 'jerusalem'} className={mapMode === 'jerusalem' ? 'active' : ''} onClick={() => setMapMode('jerusalem')}>耶路撒冷 3D 城市</button>
+          <small>公元 30 年左右</small>
+        </div>
+        {mapMode === 'jerusalem' && <Suspense fallback={<div className="city-loading" role="status">正在加载耶路撒冷 3D 地图…</div>}>
+          <JerusalemMap lang={lang} onReturn={() => setMapMode('israel')} />
+        </Suspense>}
         <div
           className="map-stage"
+          hidden={mapMode !== 'israel'}
           ref={mapRef}
           tabIndex={0}
           role="application"
@@ -642,6 +656,7 @@ const hits = (a: Box, b: Box) => a.x0 < b.x1 && a.x1 > b.x0 && a.y0 < b.y1 && a.
             </div>
             <div className="panel-tag">{active.region} · {active.theme}</div>
             <h3>{active.name}</h3>
+            {active.id === 'jerusalem' && <button className="city-entry" onClick={() => setMapMode('jerusalem')}>进入耶路撒冷 3D 地图 <span>↗</span></button>}
             {active.greek && <div className="ancient-name">{active.greek}</div>}
             {active.site && <div className="modern-site">今址 · {active.site}</div>}
             <div className="story-rule"><span /></div>
