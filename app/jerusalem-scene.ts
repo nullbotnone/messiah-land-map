@@ -189,21 +189,34 @@ export function buildJerusalemScene() {
   const cu = (n: number) => n * 0.5;
   const court = { west: -41.9, east: 51.6, north: -37, south: 30.5 };
   const axis = -3.2;
-  const outerFloor = PLATFORM.top;
-  const chelFloor = outerFloor + cu(12);
-  const courtFloor = chelFloor + cu(15);
-  const porchFloor = courtFloor + cu(12);
   const women = { west: court.east, east: court.east + cu(135) };
-
-  // The chel, a ten-cubit terrace, and the soreg standing at its edge — ten
-  // handbreadths high, with the thirteen breaches the Greek kings had made.
-  for (let i = 0; i < 12; i++) box(temple, 145 - i * 2.4, outerFloor + i * cu(0.5), axis, 2.4, cu(0.5), 112, '#c8bfa6');
-  box(temple, (court.west + court.east) / 2 + 30, outerFloor, axis, 205, chelFloor - outerFloor, 108, '#cfc6ae');
-  for (const z of [axis - 54, axis + 54]) {
-    for (let i = 0; i < 7; i++) box(temple, -50 + i * 30, chelFloor, z, 26, cu(2.6), 1.2, '#b6a98a');
+  // "All the steps in the Temple were half a cubit high with a tread of half a
+  // cubit" — twelve of them to the chel, fifteen to the court, twelve to the
+  // porch: six, seven and a half and six cubits, nearly ten metres in all.
+  const rise = cu(0.5);
+  const outerFloor = PLATFORM.top;
+  const chelFloor = outerFloor + 12 * rise;
+  const courtFloor = chelFloor + 15 * rise;
+  const porchFloor = courtFloor + 12 * rise;
+  // The chel is ten cubits wide all round the precinct, and the soreg stands at
+  // its edge: ten handbreadths high, with the thirteen breaches the Greek kings
+  // made in it and the priests repaired.
+  const chel = { west: court.west - cu(10), east: women.east + cu(10), north: court.north - cu(10), south: court.south + cu(10) };
+  // Twelve steps up to the chel, on every side of the precinct.
+  for (let i = 0; i < 12; i++) {
+    const out = i * cu(0.5), y = chelFloor - (i + 1) * rise;
+    box(temple, chel.east + out, y, axis, cu(0.5), rise, chel.south - chel.north + out * 2, '#c8bfa6');
+    box(temple, chel.west - out, y, axis, cu(0.5), rise, chel.south - chel.north + out * 2, '#c8bfa6');
+    for (const z of [chel.north - out, chel.south + out]) {
+      box(temple, (chel.west + chel.east) / 2, y, z, chel.east - chel.west + out * 2, rise, cu(0.5), '#c8bfa6');
+    }
   }
-  for (const x of [court.west - 12, 133]) {
-    for (let i = 0; i < 4; i++) box(temple, x, chelFloor, axis - 40 + i * 27, 1.2, cu(2.6), 23, '#b6a98a');
+  box(temple, (chel.west + chel.east) / 2, outerFloor, axis, chel.east - chel.west, chelFloor - outerFloor, chel.south - chel.north, '#cfc6ae');
+  for (const z of [chel.north, chel.south]) {
+    for (let i = 0; i < 7; i++) box(temple, chel.west + 12 + i * 25, chelFloor, z, 21, cu(2.6), 1.2, '#b6a98a');
+  }
+  for (const x of [chel.west, chel.east]) {
+    for (let i = 0; i < 3; i++) box(temple, x, chelFloor, chel.north + 10 + i * 29, 1.2, cu(2.6), 24, '#b6a98a');
   }
 
   // The Court of the Women, with four unroofed chambers forty cubits square in
@@ -223,14 +236,15 @@ export function buildJerusalemScene() {
   for (let i = 0; i < 13; i++) box(temple, women.west + 8 + i * 4.2, chelFloor, axis + 20, 1.6, 2.2, 1.6, '#b2a385');
   box(temple, women.east, chelFloor, axis, 4, cu(18), cu(20), '#b2914f'); // the eastern gate of the court
 
-  // Fifteen semicircular steps, "circular like the half of a threshing floor",
-  // climb to the Nicanor Gate; the Levites sang the Songs of Ascents on them.
+  // Fifteen steps climb from the Court of the Women to the Nicanor Gate, "not
+  // rectangular but circular like the half of a threshing floor", bulging east
+  // into the court; the Levites sang the Songs of Ascents standing on them.
   const stepGeometry = new THREE.CylinderGeometry(1, 1, 1, 26, 1, false, -Math.PI / 2, Math.PI);
   for (let i = 0; i < 15; i++) {
     const mesh = new THREE.Mesh(stepGeometry, mat('#cabf9f'));
-    mesh.position.set(court.east + 0.5 + i * cu(1), chelFloor + i * cu(0.5) + cu(0.25), axis);
-    mesh.scale.set(cu(50) - i * cu(1.8), cu(0.5), cu(50) - i * cu(1.8));
-    mesh.rotation.y = Math.PI;
+    mesh.position.set(court.east, chelFloor + i * rise + rise / 2, axis);
+    mesh.scale.set(cu(24) - i * cu(0.5), rise, cu(24) - i * cu(0.5));
+    mesh.rotation.y = Math.PI / 2;
     temple.add(mesh);
   }
 
@@ -277,16 +291,15 @@ export function buildJerusalemScene() {
   }
   box(temple, altar.x, courtFloor + cu(9), altar.z, cu(24), cu(0.3), cu(24), '#6b5a46'); // the place of the wood pile
   for (let i = 0; i < 16; i++) box(temple, altar.x, courtFloor + cu(9) - i * cu(0.56), altar.z + cu(16) + i * cu(2), cu(16), cu(0.7), cu(2), '#bdb293');
-  box(temple, altar.x - cu(16), courtFloor, altar.z + cu(5), cu(4), cu(4), cu(4), '#9aa79a'); // the laver
+  box(temple, altar.x - cu(21), courtFloor, altar.z + cu(6), cu(4), cu(4), cu(4), '#9aa79a'); // the laver, a little to the south
+  const slaughter = { pillars: court.north + cu(8), tables: court.north + cu(12), rings: court.north + cu(16) };
   for (let row = 0; row < 6; row++) for (let k = 0; k < 4; k++) {
-    box(temple, altar.x - cu(3) + row * cu(4), courtFloor, altar.z - cu(13) - k * cu(6), cu(1.6), 0.2, cu(1.6), '#6f6a55');
+    box(temple, altar.x - cu(9) + k * cu(6), courtFloor, slaughter.rings + row * cu(24 / 5), cu(1.6), 0.2, cu(1.6), '#6f6a55');
   }
-  for (let i = 0; i < 8; i++) box(temple, altar.x - cu(13) + i * cu(3.6), courtFloor, altar.z - cu(41), cu(2.4), cu(1.6), cu(5), '#d2cab4');
-  for (let i = 0; i < 8; i++) box(temple, altar.x - cu(13) + i * cu(3.6), courtFloor, altar.z - cu(49), cu(1.2), cu(8), cu(1.2), '#b0a68a');
-  box(temple, altar.x - cu(0.4), courtFloor + cu(8), altar.z - cu(49), cu(27), cu(0.8), cu(1.4), '#7b6a4a');
+  for (let i = 0; i < 8; i++) box(temple, altar.x - cu(13) + i * cu(3.6), courtFloor, slaughter.tables, cu(2.4), cu(1.6), cu(5), '#d2cab4');
+  for (let i = 0; i < 8; i++) box(temple, altar.x - cu(13) + i * cu(3.6), courtFloor, slaughter.pillars, cu(1.2), cu(8), cu(1.2), '#b0a68a');
+  box(temple, altar.x - cu(0.4), courtFloor + cu(8), slaughter.pillars, cu(27), cu(0.8), cu(1.4), '#7b6a4a');
 
-  // Twelve steps from the court up to the porch.
-  for (let i = 0; i < 12; i++) box(temple, 14.4 + i * cu(1), courtFloor + i * cu(0.5), axis, cu(1), cu(0.5), cu(40), '#c8bfa6');
 
   // The sanctuary. A hundred cubits each way: the porch a hundred wide and a
   // hundred high, the body behind it seventy wide, thirty-eight cells in three
@@ -294,6 +307,19 @@ export function buildJerusalemScene() {
   // chamber rising through them to the roof.
   const porch = { east: 13.6, west: 5.6 };
   const body = { east: porch.west, west: -36.4 };
+  // Twelve steps from the court up to the porch, in pairs with a landing of
+  // three cubits between them and four at the top, as Middot lays them out.
+  let stepX = porch.east + cu(1);
+  let stepY = porchFloor;
+  for (const landing of [3, 3, 4, 3, 3, 4]) {
+    for (let i = 0; i < 2; i++) {
+      stepY -= rise;
+      box(temple, stepX, stepY, axis, cu(1), rise, cu(40), '#c8bfa6');
+      stepX += cu(1);
+    }
+    box(temple, stepX + cu(landing) / 2 - cu(0.5), stepY - rise, axis, cu(landing), rise, cu(40), '#c8bfa6');
+    stepX += cu(landing);
+  }
   const cells = { x: (body.east + body.west) / 2, w: body.east - body.west };
   box(temple, cells.x, porchFloor - cu(6), axis, cu(100), cu(6), cu(100), '#e4dbc4'); // the six-cubit foundation
   box(temple, (porch.east + porch.west) / 2, porchFloor, axis, porch.east - porch.west, cu(100), cu(100), '#efe7d4');

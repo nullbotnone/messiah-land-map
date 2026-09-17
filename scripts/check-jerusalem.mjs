@@ -92,6 +92,23 @@ for (const [id, limit] of Object.entries(footprints)) {
   assert.ok(span !== undefined, `no geometry carries the site id ${id}`);
   assert.ok(span <= limit, `${id} spreads over ${span.toFixed(0)} m, more than the ${limit} m it should occupy`);
 }
+// The sanctuary stands a hundred cubits over its own floor, and that floor is
+// another nineteen and a half above the esplanade — twelve steps to the chel,
+// fifteen to the court, twelve to the porch. Flatten the approach or halve the
+// building and the roof lands somewhere else.
+const temple = [];
+city.landmarks.traverse((obj) => { if (obj.userData.siteId === 'temple') temple.push(obj); });
+assert.equal(temple.length, 1, 'the sanctuary should be one group');
+const templeBox = new THREE.Box3().setFromObject(temple[0]);
+const roof = templeBox.max.y - PLATFORM.top;
+assert.ok(roof > 58 && roof < 63, `the sanctuary roof stands ${roof.toFixed(1)} m over the esplanade, expected about 60`);
+// And none of the precinct may hang over the retaining walls.
+for (const [x, z] of [[templeBox.min.x, templeBox.min.z], [templeBox.min.x, templeBox.max.z], [templeBox.max.x, templeBox.min.z], [templeBox.max.x, templeBox.max.z]]) {
+  const inside = insidePolygon(x, z, PLATFORM.corners);
+  const margin = Math.min(...PLATFORM.corners.map(([cx, cz]) => Math.hypot(cx - x, cz - z)));
+  assert.ok(inside || margin < 40, `the precinct reaches ${x.toFixed(0)},${z.toFixed(0)}, outside the enclosure`);
+}
+
 // A label must stand over the thing it names: fly to a site and something has
 // to be there. Districts carry no geometry and are exempt.
 for (const [id, centre] of centres) {
