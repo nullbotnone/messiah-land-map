@@ -62,14 +62,12 @@ assert.equal(zoomAbout({ ...base, zoom: 0.8 }, 0.1, 300, 300, W, H).zoom, 0.7);
 assert.equal(clampPan(9999, W), W * 0.6);
 assert.equal(clampPan(-9999, H), -H * 0.6);
 
-// The hero note and the legend both quote the vertical exaggeration, and both
-// are translation keys, so the figure cannot be interpolated in. Check it here
-// instead, which keeps app/terrain.ts the only place to tune it.
+// The legend quotes the vertical exaggeration, and it is a translation key, so
+// the figure cannot be interpolated in. Check it here instead, which keeps
+// app/terrain.ts the only place to tune it.
 const { readFileSync } = await import('node:fs');
 const quoted = [
-  ['app/page.tsx', /垂直方向放大约 (\d+) 倍/],
   ['app/page.tsx', /垂直放大 (\d+)×/],
-  ['app/en.json', /exaggerated about (\d+)×/],
   ['app/en.json', /Measured elevation · (\d+)× vertical/],
 ];
 for (const [file, re] of quoted) {

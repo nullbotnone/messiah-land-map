@@ -42,37 +42,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--gold-bright); o
 .topbar nav a:hover { color: var(--ink); }
 .about-button { border: 1px solid rgba(210, 187, 132, .33); background: rgba(255,255,255,.02); padding: 10px 16px; cursor: pointer; }
 
-.hero {
-  position: relative; min-height: 100svh; display: flex; align-items: center;
-  padding: 120px clamp(24px, 8vw, 132px) 70px;
-  background:
-    radial-gradient(circle at 72% 45%, rgba(47, 84, 79, .25), transparent 29%),
-    radial-gradient(circle at 68% 64%, rgba(184, 150, 78, .09), transparent 24%),
-    linear-gradient(120deg, #071012 0%, #091618 48%, #061013 100%);
-}
-.hero::after {
-  content: ''; position: absolute; width: 58vw; height: 58vw; right: -8vw; top: 13vh;
-  border: 1px solid rgba(194, 165, 101, .12); border-radius: 50%;
-  box-shadow: 0 0 0 70px rgba(194,165,101,.025), 0 0 0 140px rgba(194,165,101,.018);
-}
-.hero-copy { position: relative; z-index: 2; max-width: 630px; }
-.eyebrow { display: flex; align-items: center; gap: 13px; color: var(--gold); font-size: 10px; letter-spacing: .32em; }
-.eyebrow > span, .eyebrow > i { display: inline-block; width: 38px; height: 1px; background: var(--gold); }
-.hero h1, .guide h2 { margin: 30px 0 26px; font: 400 clamp(56px, 6.7vw, 104px)/.98 Georgia, "Songti SC", serif; letter-spacing: -.035em; }
-.hero h1 em, .guide h2 em { color: var(--gold-bright); font-weight: 400; font-style: normal; }
-.hero-copy > p { width: min(490px, 100%); color: #a5aaa1; font: 15px/2 Arial, "PingFang SC", sans-serif; letter-spacing: .08em; }
-.primary-button {
-  margin-top: 27px; display: inline-flex; align-items: center; gap: 30px; padding: 16px 19px 16px 24px;
-  background: var(--gold); color: #111812; border: 0; cursor: pointer; font-size: 12px; letter-spacing: .18em;
-  transition: transform .2s, background .2s;
-}
-.primary-button:hover { transform: translateY(-2px); background: var(--gold-bright); }
-.primary-button span { font-size: 18px; }
-.hero-note { position: absolute; z-index: 2; right: clamp(24px, 7vw, 110px); bottom: 65px; width: 245px; display: flex; gap: 17px; }
-.hero-note span { color: var(--gold); font: 12px Georgia, serif; }
-.hero-note p { margin: 0; padding-left: 17px; border-left: 1px solid var(--line); color: #757f7c; font-size: 10px; line-height: 1.8; letter-spacing: .08em; }
-
-.map-section { background: #061014; padding: 0; }
+.map-section { background: #061014; padding: 92px 0 0; }
 .map-stage[hidden] { display: none; }
 .map-mode-bar { display: flex; align-items: center; gap: 15px; padding: 18px clamp(20px, 5vw, 76px); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
 .map-mode-bar button { padding: 10px 14px; border: 1px solid transparent; background: transparent; font-size: 12px; cursor: pointer; color: var(--muted); }
@@ -241,18 +211,8 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--gold-bright); o
 .panel-nav div { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; }
 .panel-nav i { flex: none; width: 4px; height: 4px; border-radius: 50%; background: #3e4a46; }
 .panel-nav i.active { background: var(--gold); }
-.guide { padding: 120px clamp(24px, 8vw, 130px) 80px; background: #ece7db; color: #17201c; }
-.guide .eyebrow { color: #927437; }
-.guide h2 { margin: 25px 0 70px; font-size: clamp(48px, 6vw, 82px); }
-.guide h2 em { color: #9b7935; }
-.guide-grid { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid rgba(34,48,40,.18); }
-.guide-grid article { padding: 36px 40px 42px 0; border-right: 1px solid rgba(34,48,40,.18); }
-.guide-grid article + article { padding-left: 40px; }
-.guide-grid article:last-child { border-right: 0; }
-.guide-grid span { color: #a18345; font: 11px Georgia, serif; }
-.guide-grid h3 { margin: 30px 0 17px; font: 22px Georgia, "Songti SC", serif; letter-spacing: .08em; }
-.guide-grid p { margin: 0; color: #69716c; font-size: 12px; line-height: 2; letter-spacing: .055em; }
-.source-note { display: flex; justify-content: space-between; gap: 40px; margin: 55px 0 0; padding-top: 24px; border-top: 1px solid rgba(34,48,40,.13); color: #81877e; font-size: 9px; letter-spacing: .08em; }
+.guide { padding: 40px clamp(24px, 8vw, 130px) 44px; background: #ece7db; color: #17201c; }
+.source-note { display: flex; justify-content: space-between; gap: 40px; margin: 0; color: #81877e; font-size: 9px; letter-spacing: .08em; }
 .source-note p { max-width: 730px; margin: 0; line-height: 1.8; }
 .source-note div { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 16px; }
 .source-note a { color: #7c6331; white-space: nowrap; border-bottom: 1px solid rgba(124,99,49,.25); }
@@ -265,8 +225,6 @@ footer a { justify-self: end; }
   .topbar { grid-template-columns: 1fr auto; }
   .era { display: none; }
   .topbar nav a { display: none; }
-  .hero-note { display: none; }
-  .hero::after { width: 80vw; height: 80vw; }
   .story-panel { top: auto; right: 18px; bottom: 95px; width: min(320px, calc(100% - 36px)); max-height: 68%; overflow: auto; padding: 27px; }
   .map-heading { top: 34px; }
   .map-heading h2 { font-size: 25px; }
@@ -276,8 +234,6 @@ footer a { justify-self: end; }
   .filter-bar { bottom: 24px; }
   .filter-bar button { padding: 9px 11px; font-size: 9px; }
   .view-tools, .compass, .map-hint { display: none; }
-  .guide-grid { grid-template-columns: 1fr; }
-  .guide-grid article, .guide-grid article + article { padding: 28px 0; border-right: 0; border-bottom: 1px solid rgba(34,48,40,.15); }
   .source-note { flex-direction: column; gap: 18px; }
   .source-note div { justify-content: flex-start; }
   footer { grid-template-columns: 1fr auto; }
@@ -286,11 +242,9 @@ footer a { justify-self: end; }
 
 @media (max-width: 540px) {
   .topbar { height: 75px; padding: 0 20px; }
+  .map-section { padding-top: 75px; }
   .about-button { padding: 8px 11px; }
   .brand small { display: none; }
-  .hero { min-height: 760px; padding: 112px 25px 70px; align-items: flex-start; }
-  .hero h1 { margin-top: 42px; font-size: 53px; line-height: 1.08; }
-  .hero-copy > p { font-size: 13px; }
   .map-stage { height: 760px; }
   .map-heading { left: 20px; }
   .elevation-legend { left: 20px; }
@@ -301,8 +255,7 @@ footer a { justify-self: end; }
   .marker-label b { font-size: 10px; }
   .filter-bar { width: calc(100% - 28px); justify-content: space-between; }
   .filter-bar button { padding: 9px 7px; }
-  .guide { padding: 85px 25px 55px; }
-  .guide h2 { margin-bottom: 45px; }
+  .guide { padding: 34px 25px 40px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -381,7 +334,6 @@ footer a { justify-self: end; }
 .script-toggle button.on { opacity: 1; color: var(--gold-bright); }
 
 /* Chinese runs the two halves of these headings together; English needs a gap. */
-:root[lang="en"] .hero h1 em, :root[lang="en"] .guide h2 em { margin-left: .25em; }
 
 /* ---- the BibleProject embed ---- */
 .video { margin-top: 20px; }

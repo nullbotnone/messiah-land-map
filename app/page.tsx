@@ -491,14 +491,13 @@ const hits = (a: Box, b: Box) => a.x0 < b.x1 && a.x1 > b.x0 && a.y0 < b.y1 && a.
   return (
     <main className="site-shell">
       <header className="topbar">
-        <a className="brand" href="#top" aria-label="弥赛亚之地首页">
+        <a className="brand" href="#map" aria-label="弥赛亚之地首页">
           <span className="brand-mark">✦</span>
           <span><b>弥赛亚之地</b><small>公元一世纪 · 互动地形志</small></span>
         </a>
         <div className="era"><span /> 公元 30 年左右</div>
         <nav aria-label="主导航">
           <a href="#map">探索地图</a>
-          <a href="#guide">阅读指南</a>
           <a className="about-button" href="#sources">资料来源</a>
           <div className="script-toggle" data-no-convert role="group" aria-label="语言 / Language">
             {LANGS.map(([code, label]) => (
@@ -515,19 +514,7 @@ const hits = (a: Box, b: Box) => a.x0 < b.x1 && a.x1 > b.x0 && a.y0 < b.y1 && a.
         </nav>
       </header>
 
-      <section className="hero" id="top">
-        <div className="hero-copy">
-          <div className="eyebrow"><span /> THE LAND OF THE GOSPELS</div>
-          <h1>走进耶稣<br />时代的<em>以色列</em></h1>
-          <p>地形取自 GMRT 全球多分辨率地形合成数据集（按约 550 米网格取样），海岸线、湖泊与河道取自 Natural Earth 实测矢量，行政分界还原公元 30 年前后的分封格局。转动这片土地，重新理解福音书里的距离与高差。</p>
-          <button className="primary-button" onClick={() => document.querySelector('#map')?.scrollIntoView({ behavior: 'smooth' })}>
-            开始探索 <span>↘</span>
-          </button>
-        </div>
-        <div className="hero-note"><span>01</span><p>垂直方向放大约 5 倍，否则整片高地在这个跨度下几乎是平的。平面位置与高程数值均为实测值。</p></div>
-      </section>
-
-      <section className="map-section" id="map" aria-label="耶稣时代以色列互动地图">
+      <section className="map-section" id="map"  aria-label="耶稣时代以色列互动地图">
         <div className="map-mode-bar" role="group" aria-label="地图尺度">
           <button aria-pressed={mapMode === 'israel'} className={mapMode === 'israel' ? 'active' : ''} onClick={() => setMapMode('israel')}>以色列地形图</button>
           <span>↔</span>
@@ -706,25 +693,7 @@ const hits = (a: Box, b: Box) => a.x0 < b.x1 && a.x1 > b.x0 && a.y0 < b.y1 && a.
         </div>
       </section>
 
-      <section className="guide" id="guide">
-        <div className="guide-intro">
-          <span className="eyebrow"><i /> HOW TO READ THE MAP</span>
-          <h2>山川让叙事<br />有了<em>尺度</em></h2>
-        </div>
-        <div className="guide-grid">
-          <article>
-            <span>01</span><h3>三条南北向的带状地形</h3>
-            <p>自西向东依次是海岸平原（0–50 米）、中央山脊（加利利、撒马利亚、犹大山地，多在 500–1000 米）与约旦裂谷。三者之间的高差决定了古代道路的走向。</p>
-          </article>
-          <article>
-            <span>02</span><h3>世界最低的陆地裂谷</h3>
-            <p>加利利海水面约在海平面下 209 米，死海约在 −400 米上下。从耶利哥（−258 米）上耶路撒冷（+754 米），27 公里内要爬升一千米——「上耶路撒冷」是字面意义的上行。</p>
-          </article>
-          <article>
-            <span>03</span><h3>被切成四块的土地</h3>
-            <p>耶稣公开传道时，加利利与比利亚属希律安提帕，东北部属希律腓力，犹太、撒马利亚与以土买由罗马巡抚直辖，东侧则是低加波利的自治城邦。从加利利去耶路撒冷，要么穿过撒马利亚，要么绕行约旦河东。</p>
-          </article>
-        </div>
+      <section className="guide">
         <div className="source-note" id="sources">
           <p>
             高程：GMRT 全球多分辨率地形合成数据集，按 0.005°（约 550 米）网格重采样，共 {'290,891'} 个采样点，由 GMRT 网格服务一次取得。
@@ -740,7 +709,7 @@ const hits = (a: Box, b: Box) => a.x0 < b.x1 && a.x1 > b.x0 && a.y0 < b.y1 && a.
         </div>
       </section>
 
-      <footer><span>弥赛亚之地</span><p>以地理为线索 · 重读福音书</p><a href="#top">回到顶部 ↑</a></footer>
+      <footer><span>弥赛亚之地</span><p>以地理为线索 · 重读福音书</p><a href="#map">回到地图 ↑</a></footer>
     </main>
   );
 }
