@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { cityGround, distanceToPath, FIRST_WALL, SECOND_WALL, GATES, PILGRIM_ROAD, PLATFORM, JERUSALEM_BOUNDS, insidePolygon, type Point } from './jerusalem-data';
+import { cityGround, distanceToPath, platformToWorld, FIRST_WALL, SECOND_WALL, GATES, PILGRIM_ROAD, PLATFORM, JERUSALEM_BOUNDS, insidePolygon, type Point } from './jerusalem-data';
 
 const stone = new THREE.Color('#d5c7a7');
 const darkStone = new THREE.Color('#a69a7f');
@@ -122,7 +122,8 @@ export function buildJerusalemScene() {
   for (const [z, height] of [[SOUTH - 5, 15], [SOUTH - 14, 30], [SOUTH - 28, 30], [SOUTH - 33, 15]]) {
     colonnade(royal, WEST + 4, z, EAST - 16, z, PLATFORM.top, height, 7, 0.75);
   }
-  box(royal, -6, PLATFORM.top + 30, SOUTH - 21, 268, 3, 16, '#cbbb9a');
+  box(royal, -6, PLATFORM.top + 30, SOUTH - 21, 268, 3, 18, '#cbbb9a');
+  for (const z of [SOUTH - 9.5, SOUTH - 30.5]) box(royal, -6, PLATFORM.top + 15, z, 268, 2.5, 13, '#c5b593');
 
   // Inner precinct: soreg, the Court of Israel and the Priests, the Court of the
   // Women, the altar and the sanctuary — Middot's cubits at 0.5 m.
@@ -158,8 +159,14 @@ export function buildJerusalemScene() {
   for (let i = 0; i < 12; i++) box(temple, 145 - i * 2.4, PLATFORM.top - i * 0.5, axis, 2.4, 0.5, 112, '#c8bfa6');
 
   // Huldah gates and the monumental stair, on the southern wall.
-  for (const [x, w] of [[-67, 13], [38, 15]]) box(royal, x, 118, SOUTH + 1, w, 12, 3, '#413d31');
-  for (let i = 0; i < 30; i++) box(royal, -67, 116 + i * 0.75, SOUTH + 32 - i * 1.05, 64, 0.75, 1.4, '#cabf9f');
+  const [fx, fz] = platformToWorld(-67, SOUTH + 34);
+  const foot = cityGround(fx, fz);
+  const threshold = foot + 12; // the gates open a dozen metres above the street
+  for (const [x, w] of [[-67, 13], [38, 15]]) box(royal, x, threshold, SOUTH - 1.75, w, 11, 3, '#413d31');
+  for (let i = 0; i < 30; i++) {
+    box(royal, -67, foot + (threshold - foot) * i / 30, SOUTH + 34 - i * 1.13, 64, 0.6, 2.2, '#cabf9f');
+  }
+  box(royal, -67, foot - 1, SOUTH + 36, 64, 1.2, 8, '#c3b898'); // the landing the street runs onto
 
   // Robinson's Arch: a 15 m span carrying a stair down to the valley street.
   const robinson = site('robinson', mount);
@@ -232,8 +239,9 @@ export function buildJerusalemScene() {
   const by = cityGround(73, -390) + 3;
   for (const z of [-441, -393, -341]) colonnade(bethesda, 44, z, 102, z, by, 7, 7);
   for (const x of [44, 102]) colonnade(bethesda, x, -441, x, -341, by, 7, 7);
-  pool(site('bezetha'), -654, -83, 73, 44, 0); // Amygdalon, the Pool of the Towers
-  pool(site('hinnom'), -864, 649, 100, 40, 0); // the Serpent's Pool in the Hinnom
+  const reservoirs = new THREE.Group(); root.add(reservoirs);
+  pool(reservoirs, -654, -83, 73, 44, 0); // Amygdalon, the Pool of the Towers
+  pool(reservoirs, -864, 649, 100, 40, 0); // the Serpent's Pool in the Hinnom
 
   // The palatial mansion of the Herodian Quarter: a courtyard house of some
   // 600 m² with frescoes, mosaics and its own ritual baths.
@@ -245,10 +253,35 @@ export function buildJerusalemScene() {
   for (const dx of [-13, 13]) box(upper, -290 + dx, uy + 9.2, 292, 7, 4, 30, '#d6cbab');
   box(upper, -308, uy + 0.4, 310, 5, 0.6, 5, '#477b7a'); // a mikveh in the basement rooms
 
+  // Akeldama: the rock face on the Hinnom's southern slope, honeycombed with
+  // first-century burial chambers.
+  const hinnom = site('hinnom');
+  for (let i = 0; i < 5; i++) {
+    const x = -400 + i * 36, z = 1105 + i * 12;
+    const y = cityGround(x, z);
+    box(hinnom, x, y - 9, z, 34, 11, 16, '#ab a1 89'.replaceAll(' ', ''));
+    box(hinnom, x, y - 3.5, z - 7.5, 3, 3.4, 3, '#3d382c');
+  }
+
+  // Quarries and rock-cut tombs in the open ground of Bezetha, north of the wall.
+  const bezetha = site('bezetha');
+  for (let i = 0; i < 4; i++) {
+    const x = -330 + i * 60, z = -505 + (i % 2) * 60;
+    const y = cityGround(x, z);
+    box(bezetha, x, y - 7, z, 42, 8, 34, '#b5ab8f');
+    box(bezetha, x - 14, y + 1, z, 6, 2.5, 10, '#c3b998');
+  }
+
   // The Gihon spring house, and the Siloam channel below the eastern slope.
   const gihon = site('gihon');
-  box(gihon, 135, cityGround(135, 528) - 1, 528, 14, 6, 12, '#9d9379');
-  box(gihon, 135, cityGround(135, 528) + 0.4, 528, 6, 0.6, 5, '#477b7a');
+  const spring = cityGround(135, 528);
+  box(gihon, 135, spring - 6, 528, 26, 9, 22, '#ac a2 88'.replaceAll(' ', ''));
+  box(gihon, 135, spring + 3, 528, 16, 7, 13, '#bdb191');
+  for (const dx of [-11, 11]) box(gihon, 135 + dx, spring + 3, 528, 7, 11, 9, '#b0a487');
+  box(gihon, 135, spring + 3.2, 528, 9, 0.6, 7, '#3f6f70'); // the basin the spring fills
+  // Hezekiah's tunnel runs underground from here to Siloam, so nothing of it
+  // belongs on the surface; only its mouth is built.
+  box(gihon, 148, spring - 1, 534, 5, 4, 6, '#3d382c');
 
   // Kidron valley monuments: Absalom's pillar, the Bnei Hezir tomb, Zechariah's.
   const tombs = site('kidron-tombs');
@@ -271,11 +304,29 @@ export function buildJerusalemScene() {
   // in the face across the garden.
   const golgotha = site('golgotha');
   const gy = cityGround(-528, -30);
-  box(golgotha, -528, gy - 12, -30, 76, 12, 74, '#b3a98e'); // the quarry floor and its cut faces
+  // The quarry floor, the faces left standing round it, the spur of poor stone
+  // the quarrymen walked away from, and the tomb chambers cut into the west face.
+  box(golgotha, -528, gy - 1.2, -30, 58, 1.2, 56, '#bfb69b');
+  for (const [dx, dz, w, d] of [[0, -29, 62, 5], [-31, 0, 5, 56], [31, 0, 5, 56]]) {
+    box(golgotha, -528 + dx, gy - 1, -30 + dz, w, 6.5, d, '#b0a68b');
+  }
   const spur = new THREE.Mesh(new THREE.IcosahedronGeometry(1, 0), mat('#a8a089'));
-  spur.position.set(-528, gy + 1.5, -30); spur.scale.set(5, 7.5, 4.5); golgotha.add(spur);
-  box(golgotha, -558, gy - 12, -56, 22, 11, 20, '#a89e85'); // the rock face the tombs are cut into
-  for (const dx of [-4, 4]) box(golgotha, -558 + dx, gy - 10, -46, 2.2, 3, 2.2, '#3d382c');
+  spur.position.set(-524, gy + 4, -26); spur.scale.set(6, 9, 5.5); spur.rotation.y = 0.6;
+  golgotha.add(spur);
+  box(golgotha, -552, gy, -44, 9, 9, 30, '#b0a68b'); // the west face, with its tombs
+  for (const dz of [-52, -40]) {
+    box(golgotha, -548, gy + 1, dz, 2.5, 3.6, 3.2, '#3a352a');
+    box(golgotha, -546, gy + 1, dz + 3, 1.2, 3.4, 3.4, '#9c9480'); // the stone rolled aside
+  }
+  const gardenTrunks = [], gardenLeaves = [];
+  for (let i = 0; i < 9; i++) {
+    const x = -528 + (i % 3 - 1) * 17 + (i % 2) * 5, z = -12 + Math.floor(i / 3) * 13;
+    const y = cityGround(x, z);
+    gardenTrunks.push([x, y + 2.5, z, 0.9, 5, 0.9]);
+    gardenLeaves.push([x, y + 6.5, z, 5.5, 4, 5.5]);
+  }
+  instances(golgotha, columnGeometry, '#665d43', gardenTrunks);
+  instances(golgotha, treeGeometry, '#57704b', gardenLeaves);
 
   // ---- Walls, gates and the stepped street --------------------------------
   function wallPath(points: Point[], inferred: boolean) {
@@ -283,15 +334,25 @@ export function buildJerusalemScene() {
       const [ax, az] = points[i - 1], [bx, bz] = points[i];
       const length = Math.hypot(bx - ax, bz - az);
       const n = Math.ceil(length / 22);
+      const rot = Math.atan2(bx - ax, bz - az);
+      const at = (j: number) => [ax + (bx - ax) * (j + 0.5) / n, az + (bz - az) * (j + 0.5) / n];
+      // A wall's crown is level over a stretch and steps down with the hill, so
+      // take the high ground of each piece and its neighbours: following every
+      // piece exactly leaves a row of loose blocks, levelling the whole run
+      // leaves a cliff where the ground falls away.
       for (let j = 0; j < n; j++) {
         if (inferred && j % 3 === 2) continue; // Gaps communicate an uncertain course.
-        const x = ax + (bx - ax) * (j + 0.5) / n, z = az + (bz - az) * (j + 0.5) / n;
-        const y = cityGround(x, z) - 4;
-        const rot = Math.atan2(bx - ax, bz - az);
-        box(walls, x, y, z, 6, 16, length / n + 1, inferred ? '#ad956c' : '#b9ad91', rot);
-        if (j % 2 === 0) box(walls, x, y + 16, z, 6.4, 2, 4, '#b9ad91', rot);
+        const [x, z] = at(j);
+        let crown = -Infinity;
+        for (const k of [j - 1, j, j + 1]) {
+          const [nx, nz] = at(Math.max(0, Math.min(n - 1, k)));
+          crown = Math.max(crown, cityGround(nx, nz) + 14);
+        }
+        const y = cityGround(x, z) - 5;
+        box(walls, x, y, z, 6, crown - y, length / n + 1.5, inferred ? '#ad956c' : '#b9ad91', rot);
+        if (j % 2 === 0) box(walls, x, crown, z, 6.4, 2, 4.5, '#b9ad91', rot);
       }
-      if (!inferred) box(walls, ax, cityGround(ax, az) - 4, az, 12, 23, 12);
+      if (!inferred) box(walls, ax, cityGround(ax, az) - 5, az, 12, 24, 12);
     }
   }
   wallPath(FIRST_WALL, false); wallPath(SECOND_WALL, true);
@@ -300,9 +361,19 @@ export function buildJerusalemScene() {
     box(walls, gate.x, y, gate.z, gate.w, 11, 9, '#4a4437');
     for (const side of [-1, 1]) box(walls, gate.x + side * (gate.w / 2 + 4), y, gate.z, 8, 20, 10);
   }
-  const roadPoints = PILGRIM_ROAD.map(([x, z]) => new THREE.Vector3(x, cityGround(x, z) + 2.5, z));
-  const road = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(roadPoints), 72, 4, 4, false), mat('#d5b568'));
-  roads.add(road);
+  // The street is 8 m of paving hugging the valley floor, laid in short courses
+  // that overlap so the fall of the ground — about 80 m over the 600 m from
+  // Siloam to the temple — shows as steps rather than as gaps.
+  for (let i = 1; i < PILGRIM_ROAD.length; i++) {
+    const [ax, az] = PILGRIM_ROAD[i - 1], [bx, bz] = PILGRIM_ROAD[i];
+    const length = Math.hypot(bx - ax, bz - az);
+    const n = Math.max(1, Math.round(length / 3.5));
+    const rot = Math.atan2(bx - ax, bz - az);
+    for (let j = 0; j < n; j++) {
+      const x = ax + (bx - ax) * (j + 0.5) / n, z = az + (bz - az) * (j + 0.5) / n;
+      box(roads, x, cityGround(x, z) - 0.7, z, 8, 1, length / n + 1.6, j % 2 ? '#d9cca7' : '#d1c39c', rot);
+    }
+  }
 
   // ---- Illustrative housing ------------------------------------------------
   let seed = 30;
@@ -327,7 +398,7 @@ export function buildJerusalemScene() {
     const w = 10 + random() * 11, d = 10 + random() * 11, h = 4.5 + random() * 8;
     const y = cityGround(hx, hz) - 1;
     bodies.push([hx, y + h / 2, hz, w, h, d, (random() - 0.5) * 0.35]);
-    roofs.push([hx, y + h + 0.7, hz, w + 1.8, 1.4, d + 1.8, bodies[bodies.length - 1][6]]);
+    roofs.push([hx, y + h + 0.35, hz, w + 0.8, 0.7, d + 0.8, bodies[bodies.length - 1][6]]);
   }
   instances(housing, boxGeometry, '#c6b999', bodies);
   instances(housing, boxGeometry, '#a79672', roofs);

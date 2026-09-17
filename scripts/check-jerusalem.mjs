@@ -77,17 +77,27 @@ for (const id of ['temple', 'royal-stoa', 'robinson', 'wilson', 'antonia', 'pala
 // across its own colonnade, or a bridge deck measured from the wrong end, shows
 // up here as a long block on the map long before anyone can name it.
 city.root.updateMatrixWorld(true);
-const footprints = { palace: 340, 'royal-stoa': 300, temple: 250, wilson: 210, antonia: 180, gethsemane: 160, hinnom: 130, bethesda: 130, 'kidron-tombs': 100, bezetha: 100, golgotha: 100, siloam: 90, upper: 60, robinson: 60, gihon: 40 };
+const footprints = { palace: 340, 'royal-stoa': 300, temple: 250, wilson: 210, antonia: 180, gethsemane: 160, hinnom: 220, bezetha: 260, bethesda: 130, 'kidron-tombs': 100, golgotha: 100, siloam: 90, upper: 60, robinson: 60, gihon: 40 };
 const spans = new Map();
+const centres = new Map();
 city.landmarks.traverse((obj) => {
   if (!obj.userData.siteId) return;
-  const size = new THREE.Box3().setFromObject(obj).getSize(new THREE.Vector3());
+  const box = new THREE.Box3().setFromObject(obj);
+  const size = box.getSize(new THREE.Vector3());
   spans.set(obj.userData.siteId, Math.max(spans.get(obj.userData.siteId) ?? 0, size.x, size.z));
+  centres.set(obj.userData.siteId, box.getCenter(new THREE.Vector3()));
 });
 for (const [id, limit] of Object.entries(footprints)) {
   const span = spans.get(id);
   assert.ok(span !== undefined, `no geometry carries the site id ${id}`);
   assert.ok(span <= limit, `${id} spreads over ${span.toFixed(0)} m, more than the ${limit} m it should occupy`);
+}
+// A label must stand over the thing it names: fly to a site and something has
+// to be there. Districts carry no geometry and are exempt.
+for (const [id, centre] of centres) {
+  const site = at(id);
+  const gap = Math.hypot(site.x - centre.x, site.z - centre.z);
+  assert.ok(gap < 160, `the ${id} label stands ${gap.toFixed(0)} m from its own geometry`);
 }
 
 let vertices = 0;
