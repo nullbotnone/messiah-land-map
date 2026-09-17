@@ -4,12 +4,16 @@ import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { buildJerusalemScene, disposeJerusalem } from './jerusalem-scene';
-import { cityGround, jerusalemSites, landformLabels, SOURCES, type JerusalemSite } from './jerusalem-data';
+import { cityGround, jerusalemSites, landformLabels, PLATFORM, SOURCES, type JerusalemSite } from './jerusalem-data';
 import { toTraditional } from './zh-hant';
 
 type Lang = 'hans' | 'hant' | 'en';
 type Viewer = { focus: (site?: JerusalemSite) => void; zoom: (factor: number) => void; north: () => void; top: () => void };
 type Layers = { housing: boolean; walls: boolean; roads: boolean; labels: boolean };
+
+/** Ground under a site — the esplanade itself for anything standing on it. */
+const siteGround = (site: { x: number; z: number; onPlatform?: boolean }) =>
+  site.onPlatform ? PLATFORM.top : cityGround(site.x, site.z);
 
 export default function JerusalemMap({ lang, onReturn }: { lang: Lang; onReturn: () => void }) {
   const t = (zh: string, en: string) => lang === 'en' ? en : lang === 'hant' ? toTraditional(zh) : zh;
@@ -78,13 +82,13 @@ export default function JerusalemMap({ lang, onReturn }: { lang: Lang; onReturn:
       animation = 0;
       controls.update();
       const current = jerusalemSites.find((s) => s.id === selectedRef.current)!;
-      ring.position.set(current.x, current.id === 'temple' ? 216 : cityGround(current.x, current.z) + 22, current.z);
+      ring.position.set(current.x, siteGround(current) + (current.id === 'temple' ? 60 : 22), current.z);
       renderer.render(scene, camera);
       const taken: { x: number; y: number; w: number; h: number }[] = [];
       for (const site of [...jerusalemSites, ...landformLabels].sort((a, b) => Number(b.id === current.id) - Number(a.id === current.id))) {
         const button = labelRefs.current.get(site.id);
         if (!button) continue;
-        position.set(site.x, site.id === 'temple' ? 230 : cityGround(site.x, site.z) + 40, site.z).project(camera);
+        position.set(site.x, siteGround(site) + (site.id === 'temple' ? 74 : 40), site.z).project(camera);
         const x = (position.x + 1) / 2 * el.clientWidth;
         const y = (1 - position.y) / 2 * el.clientHeight;
         const w = button.offsetWidth || 120, h = 30;
@@ -102,7 +106,7 @@ export default function JerusalemMap({ lang, onReturn }: { lang: Lang; onReturn:
       focus(site) {
         if (!site) defaultView();
         else {
-          const y = site.id === 'temple' ? 165 : cityGround(site.x, site.z);
+          const y = siteGround(site);
           controls.target.set(site.x, y, site.z);
           camera.position.set(site.x - 480, y + 550, site.z + 710);
           controls.update();
@@ -223,8 +227,8 @@ export default function JerusalemMap({ lang, onReturn }: { lang: Lang; onReturn:
           <button onClick={() => viewer.current?.focus()}>{t('全城', 'City')}</button>
         </div>
         <div className="city-terrain-key">
-          <b>{t('橄榄山 → 汲沦谷 → 圣殿山 → 中央谷 → 西部高地', 'Olives → Kidron → Temple Mount → Central Valley → Western Hill')}</b>
-          <span>{t('地形与建筑为教育性复原 · 平面单位为米 · 高差未额外放大', 'Educational terrain and architecture · metres · no vertical exaggeration')}</span>
+          <b>{t('橄榄山 810 → 汲沦谷 660 → 圣殿山 740 → 中央谷 720 → 上城 775（米）', 'Olives 810 → Kidron 660 → Temple Mount 740 → Central Valley 720 → Upper City 775 (m)')}</b>
+          <span>{t('高程为实测海拔 · 平面单位为米 · 高差未额外放大', 'Measured elevations above sea level · metres · no vertical exaggeration')}</span>
         </div>
         <p className="city-gesture">{t('拖动旋转 · 右键拖动平移 · 滚轮缩放 · 双指缩放和平移', 'Drag to orbit · right-drag to pan · scroll to zoom · two fingers to zoom and pan')}</p>
       </div>
@@ -243,13 +247,13 @@ export default function JerusalemMap({ lang, onReturn }: { lang: Lang; onReturn:
           <div className="city-source-links">{active.sources.map((key) => <a key={key} href={SOURCES[key].url} target="_blank" rel="noreferrer">{SOURCES[key].title} ↗</a>)}</div>
         </article>
         <div className="city-layers" aria-label={t('城市图层', 'City layers')}>
-          {([['housing', t('住宅', 'Houses')], ['walls', t('城墙', 'Walls')], ['roads', t('朝圣街道', 'Pilgrim street')], ['labels', t('标注', 'Labels')]] as const).map(([key, label]) => <button key={key} aria-pressed={layers[key]} className={layers[key] ? 'on' : ''} onClick={() => setLayers((v) => ({ ...v, [key]: !v[key] }))}><i />{label}</button>)}
+          {([['housing', t('住宅', 'Houses')], ['walls', t('城墙', 'Walls')], ['roads', t('阶梯朝圣街道', 'Stepped street')], ['labels', t('标注', 'Labels')]] as const).map(([key, label]) => <button key={key} aria-pressed={layers[key]} className={layers[key] ? 'on' : ''} onClick={() => setLayers((v) => ({ ...v, [key]: !v[key] }))}><i />{label}</button>)}
         </div>
         <details className="city-method">
           <summary>{t('重建依据与不确定性', 'Reconstruction and uncertainty')}</summary>
-          <p>{t('参考约瑟夫斯、考古发掘与以色列博物馆模型。博物馆模型表现公元 66 年；本图以约公元 30 年为准，不显示亚基帕一世后来开始修建的第三道城墙。', 'Informed by Josephus, excavations and the Israel Museum model. The museum depicts AD 66; this reconstruction targets c. AD 30 and omits the third wall begun later under Agrippa I.')}</p>
-          <p>{t('完整的第一道城墙走向及高度也为近似；断续的第二道城墙表示推定走向。地形按山脊和谷地关系构造，并非城市级实测高程；平台采用简化矩形，住宅、园林和建筑立面均为示意。', 'The first wall’s complete course and height are approximate too; gaps in the second wall indicate an inferred course. Terrain is modeled from ridge and valley relationships, not a surveyed city DEM. The platform is simplified to a rectangle; houses, gardens and facades are illustrative.')}</p>
-          <div className="city-wall-key"><i />{t('第一道城墙 · 近似复原', 'First wall · approximate')}<i className="inferred" />{t('第二道城墙 · 推定', 'Second wall · inferred')}</div>
+          <p>{t('参考约瑟夫斯、《米示拿·中门》、历年发掘报告与以色列博物馆模型。博物馆模型表现公元 66 年；本图以约公元 30 年为准，不显示亚基帕一世后来开始修建的第三道城墙。', 'Informed by Josephus, Mishnah Middot, excavation reports and the Israel Museum model. The museum depicts AD 66; this reconstruction targets c. AD 30 and omits the third wall begun later under Agrippa I.')}</p>
+          <p>{t('地点按各处今天的实测坐标定位，彼此的距离与方位是真实的。地形取自 SRTM 30 米高程；因两千年堆积把谷地填高了十几米，汲沦谷、中央谷与欣嫩谷按古代谷底重新下切。圣殿山平台依现存挡土墙的实际轮廓（南 280、北 315、西 485、东 470 米）建模，殿宇与庭院按文献尺寸换算（1 肘 = 0.5 米），立面、住宅与园林为示意。', 'Sites are placed from their modern surveyed coordinates, so distances and bearings between them are real. Terrain comes from SRTM 30 m elevations; because two thousand years of debris have raised the valley floors by a dozen metres and more, the Kidron, central and Hinnom valleys are cut back down to their ancient floors. The esplanade follows the surviving retaining walls (280 m south, 315 north, 485 west, 470 east); the sanctuary and courts are converted from the literary dimensions at one cubit = 0.5 m. Facades, houses and gardens are illustrative.')}</p>
+          <div className="city-wall-key"><i />{t('第一道城墙 · 近似复原', 'First wall · approximate')}<i className="inferred" />{t('第二道城墙 · 推定走向', 'Second wall · inferred course')}</div>
           {Object.values(SOURCES).map((source) => <a key={source.url} href={source.url} target="_blank" rel="noreferrer">{source.title} ↗</a>)}
         </details>
       </aside>

@@ -68,41 +68,62 @@ and filters. Drag to orbit, right-drag to pan, scroll to zoom; two fingers pan
 and zoom. Arrow keys orbit, `+` / `-` zoom and `0` restores the city view.
 The site list also works with a keyboard and remains available without WebGL.
 
-The model includes the Temple platform and sanctuary, Royal Stoa, southern
-approach, Antonia, Herod's western palace and three towers, Bethesda's twin
-pools, Siloam, an indicative pilgrim street, the western and southeastern
-residential hills, Kidron and central valleys, Hinnom and the Mount of Olives.
-The Holy Sepulchre area is indicated as a Golgotha candidate; Gethsemane is
-marked at its traditional location. Their exact first-century boundaries and
-positions are uncertain.
+The model covers the Temple Mount — retaining walls, double porticoes,
+Solomon's Portico, the Royal Stoa, the Huldah gates and their monumental stair,
+Robinson's Arch over the Tyropoeon street, Wilson's Arch and the Xystus, the
+inner courts, altar and sanctuary — the Antonia on its rock, Herod's western
+palace and the three towers, the palatial mansion of the Upper City, Bethesda's
+twin pools under five porticoes, Siloam and the stepped street, the Gihon
+spring, the Kidron valley tombs, the Golgotha candidate in its quarry, the
+first and second walls with their gates, Bezetha, Akeldama, the residential
+hills, the three valleys and the Mount of Olives.
 
 This is an **educational reconstruction**, not a surveyed ancient city.
-Coordinates are local metres (east +x, south +z), centered on the traditional
-sanctuary site at 31.778°N, 35.2354°E. Terrain is analytic relief illustrating
-ridge/valley relationships, not an interpolation of the regional 550 m DEM.
-One vertical unit equals one horizontal metre; there is no extra vertical
-exaggeration. The approximately 305 × 490 m platform is simplified to a
-rectangle; its ancient retaining walls, sanctuary elevation, courtyards and
-facades are not an exact architectural plan. Houses and olive groves are
-deterministic illustrations, rendered with instanced meshes.
+Coordinates are local metres (east +x, south +z) from the traditional sanctuary
+site at 31.778°N, 35.2354°E, and `y` is metres above sea level minus 600, so
+every height in the model can be checked against a published elevation. Sites
+are placed from the modern coordinates of the places themselves, so the
+distances and bearings between them are real.
+
+Terrain is SRTM 30 m sampled on a 50 m grid (`npm run build:dem:city`, written
+into `app/jerusalem-data.ts` the same way the regional DEM is written into
+`app/geo.ts`). Because two thousand years of debris have raised the valley
+floors — the Herodian street beside the western wall lies some 15 m under
+today's plaza — the Kidron, central and Hinnom valleys are cut back down to
+their ancient floors. One vertical unit equals one horizontal metre; there is
+no vertical exaggeration.
+
+The esplanade follows the surviving retaining walls: 280 m on the south, 315 on
+the north, 485 on the west and 470 on the east, turned about 9° from grid north,
+with everything inside laid out in that turned frame. The sanctuary and courts
+convert the literary dimensions of Mishnah Middot and Josephus at one cubit =
+0.50 m. Elevations, facades, roofs, houses and olive groves remain
+illustrations; houses and groves are deterministic and instanced.
 
 The first wall's full course and height are approximate; the second wall's
-inferred course is drawn with gaps. Agrippa I's later third wall is omitted.
+inferred course is drawn with gaps, and it is that course which puts the
+Golgotha candidate outside the city. Agrippa I's later third wall is omitted.
 The Israel Museum's model represents **AD 66**, so it is used as an architectural
-reference rather than copied as the city of Jesus's ministry. The street's
-alignment is based on excavations; its exact completion by AD 30 is not asserted.
+reference rather than copied as the city of Jesus's ministry. Coins under the
+stepped street date its completion to Pilate's governorship, AD 26–36.
 
 Sources and per-site uncertainty are visible in the city guide:
 
 - [Josephus, Jewish War V.4–5](https://avande1.sites.luc.edu/jerusalem/sources/wars5.htm)
-  — hills, walls, palace, sanctuary and Antonia.
+  — hills, walls, palace, sanctuary, Antonia and the Xystus.
+- [Mishnah Middot 2–5](https://www.sefaria.org/Mishnah_Middot.2.1)
+  — the courts, the altar and the sanctuary in cubits.
 - [Israel Museum, Second Temple model](https://www.imj.org.il/en/wings/shrine-book/model-jerusalem-second-temple-period)
   — architectural comparison, depicting AD 66.
 - [Ritmeyer, Reconstructing Herod's Temple Mount (1989)](https://cojs.org/kathleen-ritmeyer-and-leen-ritmeyer-reconstructing-herods-temple-mount-in-jerusalem-biblical-archaeology-review-15-6-1989/)
   — Temple approaches, porticoes and archaeological reconstruction.
+- [Antonia Fortress](https://en.wikipedia.org/wiki/Antonia_Fortress)
+  — the 120 × 45 m rock platform and its scarp.
+- [Biblical Archaeology Society, the Temple Mount in the Herodian period](https://www.biblicalarchaeology.org/daily/biblical-sites-places/temple-at-jerusalem/the-temple-mount-in-the-herodian-period/)
+  — Royal Stoa, gates and the monumental stair.
 - [City of David, Siloam excavations](https://cityofdavid.org.il/en/siloam-pool-opened-eng/)
-  and [pool and Herodian street](https://cityofdavid.org.il/siloan-pool/)
-  — stepped pool and principal street alignment.
+  and [the Pilgrimage Road](https://cityofdavid.org.il/en/the-pilgrims-road-to-the-temple-mount-and-the-stepped-street-eng/)
+  — stepped pool and street.
 - [Vardaman, The Pool of Bethesda (1963)](https://translation.bible/wp-content/uploads/2024/06/vardaman-1963-the-pool-of-bethesda.pdf)
   — twin-pool archaeology.
 - [Biblical Archaeology Society, Golgotha](https://www.biblicalarchaeology.org/daily/biblical-sites-places/jerusalem/where-is-golgotha-where-jesus-was-crucified/)
@@ -114,8 +135,11 @@ have explicit Chinese and English pairs, with Traditional generated by the same
 OpenCC pipeline as the regional interface. GPU resources and animation frames
 are released when leaving the city; rendering stops once controls settle.
 
-`npm run check:jerusalem` validates site/source coverage, generated geometry,
-rendering budget and the key hill/valley and candidate/wall relationships.
+`npm run check:jerusalem` validates site/source coverage, generated geometry
+and the rendering budget; that the modelled ground matches twelve measured
+elevations within 15 m and the retaining walls their published lengths within
+12 m; and that the wall/site relationships the reconstruction rests on hold —
+Golgotha outside both walls, Siloam and the palace inside the first.
 
 The map follows Google Earth, so the gestures transfer without being learned:
 
