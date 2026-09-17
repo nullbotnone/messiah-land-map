@@ -132,7 +132,7 @@ export const landformLabels = [
  * the northern arm from the Hippicus tower past the Xystus to the temple.
  * Deliberately excludes Agrippa I's third wall (AD 41–44 onward). */
 export const FIRST_WALL: Point[] = [[-700, 175], [-430, 150], [-250, 130], [-102, 104],
-  [204, 213], [190, 330], [178, 470], [163, 600], [128, 720], [72, 830], [10, 880],
+  [-74, 259], [204, 213], [190, 330], [178, 470], [163, 600], [128, 720], [72, 830], [10, 880],
   [-150, 905], [-330, 930], [-500, 930], [-620, 905], [-745, 835], [-790, 700],
   [-800, 500], [-790, 330], [-700, 175]];
 /** The second wall ran from the Gennath Gate — found in the Jewish Quarter, some
@@ -199,6 +199,10 @@ export function cityGround(x: number, z: number): number {
   const top = CITY_DEM[i] * (1 - tx) + CITY_DEM[i + 1] * tx;
   const bottom = CITY_DEM[i + CITY_DEM_NX] * (1 - tx) + CITY_DEM[i + CITY_DEM_NX + 1] * tx;
   let h = top * (1 - tz) + bottom * tz - 600;
+  // Herod's builders cut the rock down on the north and west and filled behind
+  // the walls on the south and east to level the esplanade; without that, the
+  // hill still stands through the courts.
+  if (insidePolygon(x, z, PLATFORM.corners)) h = Math.min(h, PLATFORM.top - 2);
   h = Math.min(h, valleyFloor(x, z, KIDRON, 0.30));
   h = Math.min(h, valleyFloor(x, z, TYROPOEON, 0.26));
   h = Math.min(h, valleyFloor(x, z, HINNOM, 0.34));

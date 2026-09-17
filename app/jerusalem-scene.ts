@@ -75,7 +75,33 @@ export function buildJerusalemScene() {
   const landMaterial = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 1, side: THREE.DoubleSide });
   root.add(new THREE.Mesh(terrain, landMaterial));
   // A thin slab beneath the relief makes the city read as an archaeological model.
+  const PLINTH = -30;
   box(root, 125, -60, 225, 2750, 30, 2550, '#243c37');
+  // The relief is a surface, so without a skirt down to the plinth you can see
+  // straight in under the land at every edge. Close all four.
+  const skirt: number[] = [];
+  const nx = 224, nz = 208;
+  const edge = (ax: number, az: number, bx: number, bz: number) => {
+    const ay = cityGround(ax, az), by = cityGround(bx, bz);
+    skirt.push(ax, ay, az, bx, by, bz, bx, PLINTH, bz);
+    skirt.push(ax, ay, az, bx, PLINTH, bz, ax, PLINTH, az);
+  };
+  for (let i = 0; i < nx; i++) {
+    const x1 = bounds.west + (bounds.east - bounds.west) * i / nx;
+    const x2 = bounds.west + (bounds.east - bounds.west) * (i + 1) / nx;
+    edge(x1, bounds.north, x2, bounds.north);
+    edge(x1, bounds.south, x2, bounds.south);
+  }
+  for (let i = 0; i < nz; i++) {
+    const z1 = bounds.north + (bounds.south - bounds.north) * i / nz;
+    const z2 = bounds.north + (bounds.south - bounds.north) * (i + 1) / nz;
+    edge(bounds.west, z1, bounds.west, z2);
+    edge(bounds.east, z1, bounds.east, z2);
+  }
+  const skirtGeometry = new THREE.BufferGeometry();
+  skirtGeometry.setAttribute('position', new THREE.Float32BufferAttribute(skirt, 3));
+  skirtGeometry.computeVertexNormals();
+  root.add(new THREE.Mesh(skirtGeometry, new THREE.MeshStandardMaterial({ color: '#6f6a56', roughness: 1, side: THREE.DoubleSide })));
 
   const site = (id: string, parent: THREE.Object3D = landmarks) => {
     const group = new THREE.Group(); group.userData.siteId = id; parent.add(group); return group;
@@ -109,18 +135,43 @@ export function buildJerusalemScene() {
   instances(mount, boxGeometry, '#8d8368', courses);
 
   // Double porticoes round the outer court; the eastern one is Solomon's Portico.
-  const NORTH = -236, SOUTH = 240, WEST = -150, EAST = 150;
-  for (const inset of [10, 24]) {
-    colonnade(mount, WEST + inset, NORTH + inset, EAST - inset, NORTH + inset, PLATFORM.top, 12.5, 6);
-    colonnade(mount, WEST + inset, NORTH + inset, WEST + inset, SOUTH - 36, PLATFORM.top, 12.5, 6);
-    colonnade(mount, EAST - inset, NORTH + inset, EAST - inset, SOUTH - 36, PLATFORM.top, 12.5, 6);
+  const SOUTH = 240;
+  const WEST = local[3][0], EAST = local[2][0]; // where the south wall meets the side walls
+  /** The quad drawn in by d on every side: offset each edge along its inward
+   * normal and intersect the neighbours, so corners stay on the walls' own lines. */
+  function inset(d: number) {
+    return local.map((_, i) => {
+      const lines = [(i + 3) % 4, i].map((e) => {
+        const [ax, az] = local[e], [bx, bz] = local[(e + 1) % 4];
+        const len = Math.hypot(bx - ax, bz - az);
+        const nx = -(bz - az) / len, nz = (bx - ax) / len; // inward: the quad runs clockwise
+        return { px: ax + nx * d, pz: az + nz * d, dx: bx - ax, dz: bz - az };
+      });
+      const [u, v] = lines;
+      const t = ((v.px - u.px) * v.dz - (v.pz - u.pz) * v.dx) / (u.dx * v.dz - u.dz * v.dx);
+      return [u.px + u.dx * t, u.pz + u.dz * t] as const;
+    });
   }
-  box(mount, 0, PLATFORM.top + 14.5, NORTH + 17, EAST - WEST - 20, 2, 20, '#cbbb9a');
-  for (const x of [WEST + 17, EAST - 17]) box(mount, x, PLATFORM.top + 14.5, (NORTH + SOUTH - 36) / 2 + 8, 20, 2, SOUTH - 36 - NORTH - 20, '#cbbb9a');
+  for (const d of [10, 24]) {
+    const [nw2, ne2, se2, sw2] = inset(d);
+    colonnade(mount, nw2[0], nw2[1], ne2[0], ne2[1], PLATFORM.top, 12.5, 6);
+    colonnade(mount, nw2[0], nw2[1], sw2[0], sw2[1] - 36, PLATFORM.top, 12.5, 6);
+    colonnade(mount, ne2[0], ne2[1], se2[0], se2[1] - 36, PLATFORM.top, 12.5, 6);
+  }
+  {
+    const [nw2, ne2, se2, sw2] = inset(17);
+    const roof = (a: readonly [number, number], b: readonly [number, number]) => {
+      const length = Math.hypot(b[0] - a[0], b[1] - a[1]);
+      box(mount, (a[0] + b[0]) / 2, PLATFORM.top + 14.5, (a[1] + b[1]) / 2, 20, 2, length, '#cbbb9a', Math.atan2(b[0] - a[0], b[1] - a[1]));
+    };
+    roof(nw2, ne2);
+    roof(nw2, [sw2[0], sw2[1] - 36]);
+    roof(ne2, [se2[0], se2[1] - 36]);
+  }
   // The Royal Stoa: 280 m of basilica on the southern wall, four rows of columns,
   // a nave half again as high as its aisles, 162 columns in all.
   for (const [z, height] of [[SOUTH - 5, 15], [SOUTH - 14, 30], [SOUTH - 28, 30], [SOUTH - 33, 15]]) {
-    colonnade(royal, WEST + 4, z, EAST - 16, z, PLATFORM.top, height, 7, 0.75);
+    colonnade(royal, WEST + 5, z, EAST - 5, z, PLATFORM.top, height, 7, 0.75);
   }
   box(royal, -6, PLATFORM.top + 30, SOUTH - 21, 268, 3, 18, '#cbbb9a');
   for (const z of [SOUTH - 9.5, SOUTH - 30.5]) box(royal, -6, PLATFORM.top + 15, z, 268, 2.5, 13, '#c5b593');
@@ -223,9 +274,14 @@ export function buildJerusalemScene() {
   // A basin read from outside: the terrain cannot be cut, so the rim stands a
   // little proud of the ground and the water sits just inside it.
   function pool(group: THREE.Object3D, x: number, z: number, w: number, d: number, steps = 4) {
-    const y = cityGround(x, z);
-    for (const dx of [-1, 1]) box(group, x + dx * (w / 2 + 1.6), y - 7, z, 3.2, 10, d + 6.4, '#b6ac90');
-    for (const dz of [-1, 1]) box(group, x, y - 7, z + dz * (d / 2 + 1.6), w + 6.4, 10, 3.2, '#b6ac90');
+    let y = -Infinity, low = Infinity;
+    for (const dx of [-1, 0, 1]) for (const dz of [-1, 0, 1]) {
+      const h = cityGround(x + dx * (w / 2 + 4), z + dz * (d / 2 + 4));
+      y = Math.max(y, h); low = Math.min(low, h);
+    }
+    const skirt = Math.max(10, y - low + 6);
+    for (const dx of [-1, 1]) box(group, x + dx * (w / 2 + 1.6), y + 3 - skirt, z, 3.2, skirt, d + 6.4, '#b6ac90');
+    for (const dz of [-1, 1]) box(group, x, y + 3 - skirt, z + dz * (d / 2 + 1.6), w + 6.4, skirt, 3.2, '#b6ac90');
     box(group, x, y + 1.2, z, w, 0.6, d, '#3f6f70');
     for (let i = 0; i < steps; i++) {
       const inset = i * 2.4;
@@ -329,9 +385,14 @@ export function buildJerusalemScene() {
   instances(golgotha, treeGeometry, '#57704b', gardenLeaves);
 
   // ---- Walls, gates and the stepped street --------------------------------
+  // Where the outline follows the enclosure, the retaining walls already are the
+  // city wall; drawing a second one on the esplanade's edge would be a fiction.
+  const enclosure = [...PLATFORM.corners, PLATFORM.corners[0]];
+  const onEnclosure = (x: number, z: number) => distanceToPath(x, z, enclosure) < 15;
   function wallPath(points: Point[], inferred: boolean) {
     for (let i = 1; i < points.length; i++) {
       const [ax, az] = points[i - 1], [bx, bz] = points[i];
+      if (onEnclosure(ax, az) && onEnclosure(bx, bz)) continue;
       const length = Math.hypot(bx - ax, bz - az);
       const n = Math.ceil(length / 22);
       const rot = Math.atan2(bx - ax, bz - az);
@@ -371,7 +432,14 @@ export function buildJerusalemScene() {
     const rot = Math.atan2(bx - ax, bz - az);
     for (let j = 0; j < n; j++) {
       const x = ax + (bx - ax) * (j + 0.5) / n, z = az + (bz - az) * (j + 0.5) / n;
-      box(roads, x, cityGround(x, z) - 0.7, z, 8, 1, length / n + 1.6, j % 2 ? '#d9cca7' : '#d1c39c', rot);
+      const ux = (bx - ax) / length, uz = (bz - az) / length;
+      let top = -Infinity;
+      for (const along of [-0.6, 0, 0.6]) for (const across of [-1, 0, 1]) {
+        const px = x + ux * along * (length / n) - uz * across * 4.2;
+        const pz = z + uz * along * (length / n) + ux * across * 4.2;
+        top = Math.max(top, cityGround(px, pz));
+      }
+      box(roads, x, top - 2.4, z, 8, 2.6, length / n + 1.6, j % 2 ? '#d9cca7' : '#d1c39c', rot);
     }
   }
 
