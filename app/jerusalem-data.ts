@@ -32,6 +32,8 @@ export const SOURCES = {
   southernGates: { title: 'IAA · Excavations near the Triple Gate', url: 'https://publications.iaa.org.il/atiqot/vol85/iss1/9/' },
   iaaRobinson: { title: 'IAA · Robinson’s Arch excavation report', url: 'https://hadashot.iaa.org.il/Report_Detail_Eng.aspx?id=1884' },
   iaaWilson: { title: 'IAA · Wilson’s Arch and the Great Causeway', url: 'https://hadashot.iaa.org.il/report_detail_eng.aspx?id=1738' },
+  wilsonDating: { title: 'Regev et al. · Dating Wilson’s Arch (2020)', url: 'https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0233307' },
+  mazar: { title: 'Benjamin Mazar · Temple Mount excavations, Jerusalem Revealed', url: 'https://vilnay.kinneret.ac.il/wp-content/uploads/2024/02/Jerusalem-revealed-archaeology-in-the-Holy-City.pdf' },
   kotelRobinson: { title: 'Western Wall Heritage Foundation · Robinson’s Arch', url: 'https://thekotel.org/en/wailing-wall-western-wall/' },
   middot: { title: 'Mishnah Middot 2–5 (Sefaria)', url: 'https://www.sefaria.org/Mishnah_Middot.2.1' },
   antonia: { title: 'Antonia Fortress · Wikipedia', url: 'https://en.wikipedia.org/wiki/Antonia_Fortress' },
@@ -53,21 +55,21 @@ export type JerusalemSite = {
 
 export const jerusalemSites: JerusalemSite[] = [
   { id: 'temple', name: '圣殿与内院', en: 'Sanctuary and inner courts', x: 0, z: 0, onPlatform: true,
-    description: '殿宇朝东，门廊宽 100 肘、高 100 肘（约 50 米），殿身退到 70 肘——《中门》说它「后窄前宽，形如狮子」；北、西、南三面环绕三层共 38 间贮藏室，圣所与至圣所从中拔起。庭院按半肘一级层层上升：外院上「赫勒」十二级，妇女院上内院十五级（半圆形，利未人在上面唱上行之诗），内院上门廊再十二级，合共约十米。祭坛 32 肘见方，南接 32 × 16 肘的坡道，北面是宰杀之处——二十四个环、八张大理石桌、八根矮柱。院墙内有六间厢房，南侧的「石室」是公会审议祭司资格之处；妇女院四角各有 40 肘见方的无顶院落。外邦人院与内院之间是 3 肘高的「梭雷格」石栏，栏上的希腊文警告碑已出土两块。尺寸依《米示拿·中门》与约瑟夫斯，立面细节为示意。',
-    enDescription: 'The sanctuary faces east behind a porch 100 cubits wide and 100 high (about 50 m); the body behind it draws in to 70, which Middot calls narrow behind and broad in front, resembling a lion. Thirty-eight cells in three storeys wrap its north, west and south sides, and the Hekhal rises through them. The precinct climbs half a cubit at a time: twelve steps to the chel, fifteen semicircular steps from the Court of the Women — the Levites sang the Songs of Ascents on them — and twelve more up to the porch, some ten metres in all. The altar is 32 cubits square with a 32 × 16 ramp on the south and the place of slaughtering north of it: twenty-four rings, eight marble tables, eight dwarf pillars. Six chambers open off the court, among them the Chamber of Hewn Stone where the Sanhedrin judged the priesthood, and the Court of the Women carries an unroofed 40-cubit chamber in each corner. The 3-cubit soreg divided the outer court from the inner precinct; two of its Greek warning inscriptions survive. Dimensions follow Mishnah Middot and Josephus; facades are schematic.',
+    description: '圣殿朝东，门廊宽、高各 100 肘，后部宽 70 肘；本图以一肘约 0.50 米换算。内院 187 × 135 肘，妇女院 135 肘见方，四角各有 40 肘的露天院落。十五级半圆阶梯通往尼迦挪门；祭司院依《中门》2:6 的一种记载高出以色列院 2.5 肘。祭坛与门廊之间保留 22 肘，十二级台阶通往开放的门廊。祭坛南侧是连续坡道，不是阶梯。殿侧三层厢房、院墙与房间的细部为示意。梭雷格位于赫勒外缘，高度采用《中门》所记十掌；约瑟夫斯另记三肘，两种记载并不一致。',
+    enDescription: 'The east-facing sanctuary has a porch 100 cubits wide and high and a narrower 70-cubit body; this model assumes a cubit of 0.50 m. The inner court measures 187 × 135 cubits; the 135-cubit-square Court of the Women has four open 40-cubit corner chambers. Fifteen semicircular steps lead to the Nicanor Gate. The priestly court is raised 2.5 cubits following one account in Middot 2:6. Twelve porch steps fit within the 22-cubit interval before the altar. A continuous ramp, not steps, approaches the altar from the south. Three storeys of side chambers and the court buildings are schematic. The soreg outside the chel follows Middot’s ten-handbreadth height; Josephus gives three cubits instead.',
     certainty: '文献尺寸 · 立面示意', enCertainty: 'Literary dimensions · schematic elevations', reference: 'Mark 11:15–19 · John 2:13–22 · Luke 1:9 · Acts 21:28', sources: ['middot', 'josephus', 'temple'] },
   { id: 'royal-stoa', name: '皇家柱廊与南门阶', en: 'Royal Stoa and southern steps', x: 60, z: 236, onPlatform: true,
-    description: '南墙上的巴西利卡式长廊，长约 280 米、宽约 33 米，四排共 162 根石柱，中殿高约 33 米。廊下的户勒大双门与三门通往圣殿平台；门前的阶梯宽逾 60 米、共 30 级，宽窄相间。阶前发掘出数十座洁净池，是朝圣者上殿前沐浴之处。',
-    enDescription: 'A basilica along the southern wall, about 280 m long and 33 m wide, with 162 columns in four rows and a nave some 33 m high. Beneath it the Double and Triple (Huldah) Gates led up onto the esplanade. The staircase before them is over 60 m wide with 30 alternating shallow and deep steps, and dozens of ritual baths have been excavated at its foot.',
+    description: '南墙上是三通廊的皇家柱廊。约瑟夫斯记四排共 162 根柱，南排嵌入墙内，中殿宽为侧廊的 1.5 倍，高约为两倍；柱顶上方的墙体托起高屋顶。南面的双门与三门位于平台以下，通道在内部上升。双门前宽约 64 米的阶梯采用宽窄相间的低台阶，抵达门前平台；三门前另设较窄的示意阶道。屋顶、门面及精确标高属于复原，不是现存遗迹的逐石测绘。',
+    enDescription: 'Josephus describes a three-aisled Royal Stoa with 162 columns in four rows, the southern row engaged in the wall. The central aisle is 1.5 times the width and roughly twice the height of a side aisle; masonry above the columns supports its raised roof. The Double and Triple Gates lie below the esplanade, with passages rising inside. The approximately 64 m-wide Double Gate approach has low, alternating shallow and deep treads reaching a gate landing; a separate, narrower Triple Gate approach is schematic. Roofs, gate facades and precise elevations are reconstructed, not a stone-by-stone survey.',
     certainty: '考古遗存与文献 · 上层复原', enCertainty: 'Excavated below, reconstructed above', reference: 'Luke 2:46 · Acts 2:41 · Mark 13:1', sources: ['herodian', 'josephusAntiquities', 'southernGates', 'museum'] },
   { id: 'robinson', name: '罗宾逊拱门与提罗泊谷大街', en: 'Robinson’s Arch and the Tyropoeon street', x: -84, z: 248,
-    description: '西南角的巨拱长约 15.2 米、宽约 12.9 米，托着通往皇家柱廊的纪念性阶梯；拱下是约 8 米宽的提罗泊谷铺石街，街边有店铺与排水道。拱的西侧台基和一列较小拱共同构成阶梯系统；复原的转折方向仍有争议。',
-    enDescription: 'At the south-west corner, a monumental arch about 15.2 m long and 12.9 m wide carried the stair up to the Royal Stoa. Beneath it ran an approximately 8 m-wide paved Tyropoeon street with shops and drainage. Its western pier and a row of smaller vaults formed a larger stair system; the exact turns of that stair remain debated.',
-    certainty: '考古遗存 · 阶梯复原', enCertainty: 'Excavated remains · reconstructed stair', reference: 'Josephus · Antiquities XV.11.5', sources: ['iaaRobinson', 'kotelRobinson', 'road', 'josephusAntiquities'] },
+    description: '西南角附近的罗宾逊拱门跨越提罗泊谷街道，东西跨度约 13 米，南北宽约 15 米。依据马扎尔发掘复原，阶梯在街道西侧由南向北上升，沿较小拱券到达西侧台基，再向东转过主拱，进入皇家柱廊。约 8 米宽的街道从拱下穿过，旁有店铺，地下设排水道。阶梯细部和街面标高为示意；街道铺设年代跨越彼拉多时期，公元 30 年附近的完工状态不能确定。',
+    enDescription: 'Near the south-west corner, Robinson’s Arch spans roughly 13 m east–west and is about 15 m wide north–south. Following Mazar’s excavation reconstruction, stairs rise northward on smaller vaults west of the street, reach the western pier, then turn east over the main arch into the Royal Stoa. The approximately 8 m-wide street remains open beneath the arch, with shops beside it and drainage below. Stair details and street elevations are schematic. Street paving dates into Pilate’s administration, so its completion around AD 30 is uncertain.',
+    certainty: '考古遗存 · 阶梯复原', enCertainty: 'Excavated remains · reconstructed stair', reference: 'Josephus · Antiquities XV.11.5', sources: ['mazar', 'iaaRobinson', 'kotelRobinson', 'road'] },
   { id: 'wilson', name: '威尔逊拱门与西斯图斯', en: 'Wilson’s Arch and the Xystus', x: -112, z: 104,
-    description: '西墙中段的威尔逊拱门长约 14.8 米、拱径约 12.8 米，是连向上城的大桥最东端；西侧接着约 11 米宽的两列拱券。约瑟夫斯所说的西斯图斯与议事建筑位于上城一带，具体边界未能确定，本图只作低矮广场示意。',
-    enDescription: 'Wilson’s Arch, about 14.8 m long with a 12.8 m arch diameter, is the eastern end of the bridge toward the Upper City; westward it joins two rows of narrower vaults about 11 m overall wide. Josephus places the Xystus and civic buildings in the Upper City, but their exact footprint is uncertain, so the low plaza here is schematic.',
-    certainty: '遗存定位 · 西斯图斯示意', enCertainty: 'Located by remains · schematic Xystus', reference: 'Josephus · Jewish War V.4.2', sources: ['iaaWilson', 'josephus', 'josephusAntiquities'] },
+    description: '威尔逊拱门东西跨度约 12.8 米，桥面通向圣殿山。2020 年碳十四研究将北侧初期工程定于公元前 20 年至公元 20 年，南侧扩建定于公元 30—60 年，桥宽由 7.4 米增至 14.8 米。本图采用较早的窄桥方案。西侧桥跨为示意，不把后来罗马时期的双列拱券直接当作公元 30 年原貌。西斯图斯广场具体位置、边界及议事建筑轮廓未定，仅以低矮铺地区域表示。',
+    enDescription: 'Wilson’s Arch spans about 12.8 m east–west and carries access to the Temple Mount. A 2020 radiocarbon study dates its northern phase to 20 BC–AD 20 and the southern widening to AD 30–60, increasing the bridge from 7.4 to 14.8 m wide. This map chooses the earlier, narrower phase. Western bridge bays are schematic; the later Roman double-row causeway is not copied into AD 30. The Xystus’s precise location, boundaries and civic buildings remain uncertain and are indicated only by a low paved area.',
+    certainty: '早期桥宽 · 西段与广场示意', enCertainty: 'Early bridge width · schematic western approach', reference: 'Josephus · Jewish War V.4.2', sources: ['wilsonDating', 'iaaWilson', 'josephus'] },
   { id: 'antonia', name: '安东尼堡', en: 'Antonia Fortress', x: -60, z: -262,
     description: '建在圣殿山西北角外的岩台上，岩台约 120 × 45 米，南面是削出的峭壁。约瑟夫斯记四角有塔，三座 50 肘，东南角一座 70 肘，可俯瞰整个圣殿院落。罗马驻军由此看守节期的人群；堡内布局无考古依据。',
     enDescription: 'Built on a rock platform about 120 × 45 m outside the north-west corner of the Temple Mount, with a cut scarp on its southern side. Josephus gives it four corner towers, three of 50 cubits and the south-eastern one of 70, from which the whole temple court could be watched. The Roman garrison policed the festival crowds from here; the internal plan is unknown.',
@@ -156,7 +158,15 @@ export const GATES = [
  * about 600 m of paving over a drainage channel, finished under Pilate — and on
  * north along the western wall past Robinson's Arch. */
 export const PILGRIM_ROAD: Point[] = [[-40, 820], [-62, 700], [-80, 560], [-92, 420],
-  [-98, 300], [-88, 250], [-100, 160], [-112, 60], [-120, -30]];
+  [-98, 320], ...[270, 228, 160, 76.3, -30].map((z) => platformToWorld(templeWestX(z) - 6.4, z))];
+
+/** West retaining face in the mount's rotated coordinate frame. */
+export function templeWestX(z: number): number {
+  const c = Math.cos(PLATFORM.angle), s = Math.sin(PLATFORM.angle);
+  const toLocal = ([x, z]: Point) => [(x - PLATFORM.centre[0]) * c - (z - PLATFORM.centre[1]) * s, (x - PLATFORM.centre[0]) * s + (z - PLATFORM.centre[1]) * c];
+  const [a, b] = [toLocal(PLATFORM.corners[0]), toLocal(PLATFORM.corners[3])];
+  return a[0] + (b[0] - a[0]) * (z - a[1]) / (b[1] - a[1]);
+}
 
 /** Modern surface, SRTM 30 m on a 50 m grid; see scripts/build-city-dem.mjs. */
 export const CITY_DEM_NX = 56;
@@ -211,6 +221,30 @@ export function cityGround(x: number, z: number): number {
   h = Math.min(h, valleyFloor(x, z, KIDRON, 0.30));
   h = Math.min(h, valleyFloor(x, z, TYROPOEON, 0.26));
   h = Math.min(h, valleyFloor(x, z, HINNOM, 0.34));
+  // Smooth modern DEM cannot resolve the excavated street beside the wall.
+  // An explicitly approximate 722–724 m ASL terrace keeps its 8 m corridor
+  // consistent under both arches. Blend back into the DEM outside that strip.
+  const c = Math.cos(PLATFORM.angle), s = Math.sin(PLATFORM.angle);
+  const lx = (x - PLATFORM.centre[0]) * c - (z - PLATFORM.centre[1]) * s;
+  const lz = (x - PLATFORM.centre[0]) * s + (z - PLATFORM.centre[1]) * c;
+  const fromWall = templeWestX(lz) - lx;
+  if (fromWall > 0 && fromWall < 28 && lz > -65 && lz < 310) {
+    const across = Math.min(1, fromWall / 1.5, (28 - fromWall) / 14);
+    const along = Math.min(1, (lz + 65) / 35, (310 - lz) / 40);
+    const blend = Math.max(0, across * along);
+    h += (124 - (lz - 76.3) * 2 / 151.7 - h) * blend;
+  }
+  // Reconstructed bedrock/filled terraces beneath the southern approaches.
+  // These local levels are illustrative: the coarse modern DEM cannot give
+  // the ancient gate thresholds or the cross-slope of individual stairs.
+  if (lz > 240 && lz < 276) {
+    for (const [gateX, halfWidth, foot] of [[-67, 32, 126.7], [38, 14, 116]]) {
+      const across = Math.max(0, Math.min(1, (halfWidth + 6 - Math.abs(lx - gateX)) / 6));
+      const along = Math.min(1, (276 - lz) / 12);
+      const terrace = foot + 6.6 * Math.max(0, Math.min(1, (263.25 - lz) / 20.25));
+      h += (terrace - h) * across * along;
+    }
+  }
   return h;
 }
 
@@ -236,7 +270,7 @@ export function insidePolygon(x: number, z: number, points: Point[]): boolean {
 }
 
 /** World metres for a point in the Temple Mount's own turned frame. */
-export function platformToWorld(lx: number, lz: number): Point {
+export function platformToWorld(lx: number, lz: number): readonly [number, number] {
   const c = Math.cos(PLATFORM.angle), s = Math.sin(PLATFORM.angle);
   return [PLATFORM.centre[0] + lx * c + lz * s, PLATFORM.centre[1] - lx * s + lz * c];
 }

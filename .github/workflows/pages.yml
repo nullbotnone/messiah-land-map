@@ -34,6 +34,10 @@ jobs:
         run: npm run check:en
       - name: Check the map view maths
         run: npm run check:view
+      - name: Check Jerusalem model geometry
+        run: npm run check:jerusalem
+      - name: Check TypeScript
+        run: npx tsc --noEmit
       # Not allowed to block a deploy: it talks to YouTube, and an outage there
       # is no reason to stop shipping terrain. It still surfaces a dead embed.
       - name: Check the embedded videos still resolve

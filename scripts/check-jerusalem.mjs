@@ -73,17 +73,60 @@ city.landmarks.traverse((obj) => { if (obj.userData.siteId) landmarkIds.push(obj
 for (const id of ['temple', 'royal-stoa', 'robinson', 'wilson', 'antonia', 'palace', 'bethesda', 'siloam', 'gihon', 'golgotha', 'gethsemane', 'kidron-tombs', 'upper', 'hinnom']) {
   assert.ok(landmarkIds.includes(id), `no geometry carries the site id ${id}`);
 }
-for (const id of ['robinson', 'wilson']) {
-  let siteGroup;
-  city.landmarks.traverse((obj) => { if (obj.userData.siteId === id) siteGroup = obj; });
-  let hasArch = false;
-  siteGroup?.traverse((obj) => { if (obj.userData.modelPart === 'arch') hasArch = true; });
-  assert.ok(hasArch, `${id} must contain an open arch mesh`);
-}
 // Nothing may sprawl past the footprint of the thing it represents. A beam laid
 // across its own colonnade, or a bridge deck measured from the wrong end, shows
 // up here as a long block on the map long before anyone can name it.
 city.root.updateMatrixWorld(true);
+// Test the geometry, not a metadata flag: a ray must pass under each vault,
+// and hit masonry above its intrados. This catches sealed and inverted arches.
+city.landmarks.traverse((obj) => {
+  if (obj.userData.modelPart !== 'arch') return;
+  const { span, rise, spring, depth, height } = obj.userData.opening;
+  const ray = (x, y) => {
+    const origin = obj.localToWorld(new THREE.Vector3(x, y, -depth / 2 - 1));
+    const direction = new THREE.Vector3(0, 0, 1).transformDirection(obj.matrixWorld);
+    return new THREE.Raycaster(origin, direction, 0, depth + 2).intersectObject(obj, false);
+  };
+  for (const x of [-span * 0.3, 0, span * 0.3]) {
+    const intrados = spring + rise * Math.sqrt(1 - (2 * x / span) ** 2);
+    assert.equal(ray(x, intrados - 0.25).length, 0, 'arch opening is sealed or wrongly triangulated');
+  }
+  assert.ok(ray(0, height - 0.4).length, 'arch crown is missing');
+});
+// Main spans must follow the west-wall normal, with an unobstructed 8 m-wide
+// street through their north/south opening, including all neighbouring meshes.
+for (const id of ['robinson', 'wilson']) {
+  const arch = city.root.getObjectByName(`${id}-main-arch`);
+  assert.ok(arch, `${id}: missing principal arch`);
+  const spanDirection = new THREE.Vector3(1, 0, 0).transformDirection(arch.matrixWorld);
+  assert.ok(Math.abs(spanDirection.x) > 0.95, `${id}: arch spans north/south instead of across the street`);
+  for (const x of [-4, 0, 4]) {
+    const origin = arch.localToWorld(new THREE.Vector3(x, 2, -12));
+    const direction = new THREE.Vector3(0, 0, 1).transformDirection(arch.matrixWorld);
+    const hits = new THREE.Raycaster(origin, direction, 0, 24).intersectObjects([city.landmarks, city.roads], true);
+    assert.equal(hits.length, 0, `${id}: street obstructed by ${hits[0]?.object.name || hits[0]?.object.type}`);
+  }
+}
+const namedBounds = (name) => {
+  const obj = city.root.getObjectByName(name);
+  assert.ok(obj, `missing ${name}`);
+  // Temple parts share the mount frame: undo its rotation for local clearances.
+  const inverse = new THREE.Matrix4().copy(obj.parent.matrixWorld).invert();
+  const result = new THREE.Box3();
+  obj.traverse((mesh) => {
+    if (!mesh.isMesh) return;
+    mesh.geometry.computeBoundingBox();
+    result.union(mesh.geometry.boundingBox.clone().applyMatrix4(new THREE.Matrix4().multiplyMatrices(inverse, mesh.matrixWorld)));
+  });
+  return result;
+};
+assert.ok(namedBounds('porch-steps').max.x <= namedBounds('altar').min.x + 0.01, 'porch steps run into the altar');
+assert.ok(namedBounds('altar-ramp').max.z < 30.5 - 5, 'altar ramp runs into the south chambers');
+for (const name of ['double', 'triple']) {
+  const steps = namedBounds(`${name}-gate-steps`), landing = namedBounds(`${name}-gate-landing`);
+  assert.ok(Math.abs(steps.max.y - landing.max.y) < 0.01, `${name}: stair does not reach its landing`);
+  assert.ok(steps.min.z <= landing.max.z && steps.min.z >= landing.min.z, `${name}: gap before gate landing`);
+}
 const footprints = { palace: 340, 'royal-stoa': 300, temple: 250, wilson: 210, antonia: 180, gethsemane: 160, hinnom: 220, bezetha: 260, bethesda: 130, 'kidron-tombs': 100, golgotha: 100, siloam: 90, upper: 60, robinson: 60, gihon: 40 };
 const spans = new Map();
 const centres = new Map();
@@ -100,8 +143,8 @@ for (const [id, limit] of Object.entries(footprints)) {
   assert.ok(span <= limit, `${id} spreads over ${span.toFixed(0)} m, more than the ${limit} m it should occupy`);
 }
 // The sanctuary stands a hundred cubits over its own floor, and that floor is
-// another nineteen and a half above the esplanade — twelve steps to the chel,
-// fifteen to the court, twelve to the porch. Flatten the approach or halve the
+// another twenty-two above the esplanade — twelve steps to the chel,
+// fifteen to Israel, the raised priestly court, twelve to the porch. Flatten the approach or halve the
 // building and the roof lands somewhere else.
 const temple = [];
 city.landmarks.traverse((obj) => { if (obj.userData.siteId === 'temple') temple.push(obj); });

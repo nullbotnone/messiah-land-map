@@ -47,14 +47,25 @@ export default function JerusalemMap({ lang, onReturn }: { lang: Lang; onReturn:
     renderer.setClearColor('#081619', 1);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.35;
+    renderer.toneMappingExposure = 1;
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     el.appendChild(renderer.domElement);
     const scene = new THREE.Scene();
     scene.fog = new THREE.Fog('#081619', 3400, 6800);
-    scene.add(new THREE.HemisphereLight('#fff0d4', '#425e53', 2.3));
-    const sun = new THREE.DirectionalLight('#ffe1af', 3);
-    sun.position.set(-1400, 2200, 800); scene.add(sun);
+    scene.add(new THREE.HemisphereLight('#fff7e8', '#657369', 1.25));
+    const sun = new THREE.DirectionalLight('#fff1d7', 2.4);
+    sun.position.set(-400, 700, 300); sun.target.position.set(30, 140, 0);
+    sun.castShadow = true;
+    sun.shadow.mapSize.set(2048, 2048);
+    Object.assign(sun.shadow.camera, { left: -420, right: 420, top: 420, bottom: -420, near: 1, far: 1600 });
+    sun.shadow.normalBias = 0.3;
+    sun.shadow.bias = -0.00015;
+    scene.add(sun, sun.target);
     const city = buildJerusalemScene();
+    city.landmarks.traverse((object) => {
+      if (object instanceof THREE.Mesh) { object.castShadow = true; object.receiveShadow = true; }
+    });
     layersRef.current = city;
     scene.add(city.root);
     const camera = new THREE.PerspectiveCamera(42, 1, 5, 10000);
@@ -73,7 +84,7 @@ export default function JerusalemMap({ lang, onReturn }: { lang: Lang; onReturn:
       controls.update();
     };
     defaultView();
-    const ring = new THREE.Mesh(new THREE.RingGeometry(22, 26, 48), new THREE.MeshBasicMaterial({ color: '#edcb76', side: THREE.DoubleSide, depthTest: false, transparent: true, opacity: 0.9 }));
+    const ring = new THREE.Mesh(new THREE.RingGeometry(22, 22.8, 48), new THREE.MeshBasicMaterial({ color: '#edcb76', side: THREE.DoubleSide, depthTest: false, transparent: true, opacity: 0.45 }));
     ring.rotation.x = -Math.PI / 2; ring.renderOrder = 10; scene.add(ring);
     let animation = 0;
     let awakeUntil = 0;
@@ -187,6 +198,7 @@ export default function JerusalemMap({ lang, onReturn }: { lang: Lang; onReturn:
       renderer.domElement.removeEventListener('pointerup', pointerUp);
       renderer.domElement.removeEventListener('webglcontextlost', contextLost);
       disposeJerusalem(city.root); ring.geometry.dispose(); ring.material.dispose();
+      sun.shadow.dispose();
       renderer.dispose(); renderer.forceContextLoss(); renderer.domElement.remove();
       viewer.current = null; layersRef.current = null;
     };
