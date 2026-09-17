@@ -8,11 +8,12 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import * as OpenCC from 'opencc-js';
 
-const SOURCES = ['app/page.tsx', 'app/places.ts', 'app/geo.ts', 'app/videos.ts'];
+const SOURCES = ['app/page.tsx', 'app/places.ts', 'app/geo.ts', 'app/videos.ts', 'app/jerusalem-map.tsx', 'app/jerusalem-data.ts'];
 
 // OpenCC has no context beyond its phrase dictionary, and a few of our terms
 // have a preferred Taiwanese form it does not pick. Tune here, nowhere else.
 const OVERRIDES = {
+  发掘: '發掘',
   受难周: '受難週',
   最后一周: '最後一週',
   一周: '一週',
@@ -27,7 +28,13 @@ const runs = [...new Set(text.match(/[一-鿿]+/g) ?? [])];
 
 // Convert each run whole, so every character is resolved with its real context.
 const converted = runs.map((run) => {
-  const t = convert(run);
+  let t = convert(run);
+  // Apply vocabulary overrides before building longer context windows.
+  for (const [k, v] of Object.entries(OVERRIDES)) {
+    for (let i = run.indexOf(k); i !== -1; i = run.indexOf(k, i + 1)) {
+      t = t.slice(0, i) + v + t.slice(i + k.length);
+    }
+  }
   if (t.length !== run.length) throw new Error(`conversion changed length: ${run} -> ${t}`);
   return t;
 });
