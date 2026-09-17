@@ -4,7 +4,6 @@ import { cityGround, distanceToPath, platformToWorld, FIRST_WALL, SECOND_WALL, G
 const stone = new THREE.Color('#d5c7a7');
 const darkStone = new THREE.Color('#a69a7f');
 const gold = new THREE.Color('#c5a35d');
-const CUBIT = 0.5;
 
 export function buildJerusalemScene() {
   const root = new THREE.Group();
@@ -176,38 +175,147 @@ export function buildJerusalemScene() {
   box(royal, -6, PLATFORM.top + 30, SOUTH - 21, 268, 3, 18, '#cbbb9a');
   for (const z of [SOUTH - 9.5, SOUTH - 30.5]) box(royal, -6, PLATFORM.top + 15, z, 268, 2.5, 13, '#c5b593');
 
-  // Inner precinct: soreg, the Court of Israel and the Priests, the Court of the
-  // Women, the altar and the sanctuary — Middot's cubits at 0.5 m.
+  // ---- The inner precinct, in cubits ---------------------------------------
+  // Mishnah Middot measures the whole enclosure, and every number below is its
+  // own: the court 187 × 135, the Court of the Women 135 square with four
+  // 40-cubit corner chambers, the altar 32 square with a 32 × 16 ramp, the
+  // sanctuary 100 × 100 × 100 — narrow behind and broad in front, "resembling
+  // a lion". A Herodian royal cubit is taken as 0.50 m.
+  //
+  // The precinct climbs as you go in, half a cubit at a time: twelve steps from
+  // the outer court to the chel, fifteen more from the Court of the Women to
+  // the court itself, twelve again from the court up to the porch — ten metres
+  // in all, which is what "going up to the house of the Lord" is made of.
+  const cu = (n: number) => n * 0.5;
   const court = { west: -41.9, east: 51.6, north: -37, south: 30.5 };
   const axis = -3.2;
-  box(temple, (court.west + court.east) / 2 + 30, PLATFORM.top, axis, 205, 1.6, 108, '#cfc6ae'); // the chel terrace
-  for (const z of [axis - 54, axis + 54]) box(temple, (court.west + court.east) / 2 + 30, PLATFORM.top + 1.6, z, 205, 1.3, 1.2, '#b6a98a'); // soreg
-  for (const x of [court.west - 12, 133]) box(temple, x, PLATFORM.top + 1.6, axis, 1.2, 1.3, 108, '#b6a98a');
-  for (const z of [court.north, court.south]) box(temple, (court.west + court.east) / 2, PLATFORM.top + 1.6, z, court.east - court.west, 12, 3, '#cdc4ab');
-  box(temple, court.west, PLATFORM.top + 1.6, axis, 3, 12, court.south - court.north, '#cdc4ab');
-  const women = { west: court.east, east: court.east + 67.5 };
-  for (const z of [court.north, court.south]) box(temple, (women.west + women.east) / 2, PLATFORM.top + 1.6, z, women.east - women.west, 10, 3, '#cdc4ab');
-  box(temple, women.east, PLATFORM.top + 1.6, axis, 3, 10, court.south - court.north, '#cdc4ab');
-  for (const x of [women.west + 12, women.east - 12]) for (const z of [court.north + 12, court.south - 12]) {
-    for (const [dx, dz, w, d] of [[0, -10, 20, 1.5], [0, 10, 20, 1.5], [-10, 0, 1.5, 20], [10, 0, 1.5, 20]]) {
-      box(temple, x + dx, PLATFORM.top + 1.6, z + dz, w, 7, d, '#c9c0a7'); // the four unroofed chambers
+  const outerFloor = PLATFORM.top;
+  const chelFloor = outerFloor + cu(12);
+  const courtFloor = chelFloor + cu(15);
+  const porchFloor = courtFloor + cu(12);
+  const women = { west: court.east, east: court.east + cu(135) };
+
+  // The chel, a ten-cubit terrace, and the soreg standing at its edge — ten
+  // handbreadths high, with the thirteen breaches the Greek kings had made.
+  for (let i = 0; i < 12; i++) box(temple, 145 - i * 2.4, outerFloor + i * cu(0.5), axis, 2.4, cu(0.5), 112, '#c8bfa6');
+  box(temple, (court.west + court.east) / 2 + 30, outerFloor, axis, 205, chelFloor - outerFloor, 108, '#cfc6ae');
+  for (const z of [axis - 54, axis + 54]) {
+    for (let i = 0; i < 7; i++) box(temple, -50 + i * 30, chelFloor, z, 26, cu(2.6), 1.2, '#b6a98a');
+  }
+  for (const x of [court.west - 12, 133]) {
+    for (let i = 0; i < 4; i++) box(temple, x, chelFloor, axis - 40 + i * 27, 1.2, cu(2.6), 23, '#b6a98a');
+  }
+
+  // The Court of the Women, with four unroofed chambers forty cubits square in
+  // its corners — Nazirites, wood, those with skin disease, oil — the balcony
+  // added so the women could look on from above, and the thirteen shofar chests.
+  box(temple, (women.west + women.east) / 2, chelFloor - 4, axis, women.east - women.west, 4, court.south - court.north, '#c7bea1');
+  for (const z of [court.north, court.south]) box(temple, (women.west + women.east) / 2, chelFloor, z, women.east - women.west, cu(20), 3, '#cdc4ab');
+  box(temple, women.east, chelFloor, axis, 3, cu(20), court.south - court.north, '#cdc4ab');
+  for (const x of [women.west + cu(20) + 1.5, women.east - cu(20) - 1.5]) {
+    for (const z of [court.north + cu(20) + 1.5, court.south - cu(20) - 1.5]) {
+      for (const [dx, dz, w, d] of [[0, -cu(20), cu(40), 1.2], [0, cu(20), cu(40), 1.2], [-cu(20), 0, 1.2, cu(40)], [cu(20), 0, 1.2, cu(40)]]) {
+        box(temple, x + dx, chelFloor, z + dz, w, cu(14), d, '#c9c0a7');
+      }
     }
   }
-  box(temple, court.east, PLATFORM.top + 1.6, axis, 3, 14, 40, '#cdc4ab'); // wall between the courts
-  box(temple, court.east, PLATFORM.top + 3, axis, 4, 11, 14, gold); // the Nicanor Gate
-  box(temple, women.east, PLATFORM.top + 3, axis, 4, 9, 12, '#b2914f'); // the eastern gate
-  // Altar, 32 cubits square, with its ramp on the south.
-  box(temple, 32.6, PLATFORM.top + 1.6, axis, 32 * CUBIT, 5, 32 * CUBIT, '#b8ab8d');
-  box(temple, 32.6, PLATFORM.top + 1.6, axis + 16, 16, 3.4, 16, '#b0a385');
-  // Sanctuary: 100 cubits long, 70 wide, 100 high, with a porch the full width.
-  box(temple, -11.4, PLATFORM.top + 1.6, axis, 50, 40, 35, '#efe7d4');
-  box(temple, 11.1, PLATFORM.top + 1.6, axis, 5, 50, 50, '#efe7d4');
-  box(temple, -11.4, PLATFORM.top + 41.6, axis, 51, 2.5, 36, gold);
-  for (const dz of [-18, 18]) box(temple, 13.4, PLATFORM.top + 1.6, axis + dz, 2, 50, 14, '#e6dcc6'); // the porch's flanking piers
-  box(temple, 14.2, PLATFORM.top + 6, axis, 1.6, 28, 11, '#584b34'); // the great doorway, twenty cubits high
-  for (let i = 0; i < 15; i++) box(temple, court.east + 6 + i * 1.2, PLATFORM.top + 1.6 - i * 0.35, axis, 1.2, 0.35, 26, '#cabf9f');
-  // Twelve steps up to the chel, fifteen more at the Nicanor Gate.
-  for (let i = 0; i < 12; i++) box(temple, 145 - i * 2.4, PLATFORM.top - i * 0.5, axis, 2.4, 0.5, 112, '#c8bfa6');
+  for (const z of [court.north + 4, court.south - 4]) box(temple, (women.west + women.east) / 2, chelFloor + cu(12), z, women.east - women.west - 8, 1.2, 3.4, '#c1b79b');
+  for (let i = 0; i < 13; i++) box(temple, women.west + 8 + i * 4.2, chelFloor, axis + 20, 1.6, 2.2, 1.6, '#b2a385');
+  box(temple, women.east, chelFloor, axis, 4, cu(18), cu(20), '#b2914f'); // the eastern gate of the court
+
+  // Fifteen semicircular steps, "circular like the half of a threshing floor",
+  // climb to the Nicanor Gate; the Levites sang the Songs of Ascents on them.
+  const stepGeometry = new THREE.CylinderGeometry(1, 1, 1, 26, 1, false, -Math.PI / 2, Math.PI);
+  for (let i = 0; i < 15; i++) {
+    const mesh = new THREE.Mesh(stepGeometry, mat('#cabf9f'));
+    mesh.position.set(court.east + 0.5 + i * cu(1), chelFloor + i * cu(0.5) + cu(0.25), axis);
+    mesh.scale.set(cu(50) - i * cu(1.8), cu(0.5), cu(50) - i * cu(1.8));
+    mesh.rotation.y = Math.PI;
+    temple.add(mesh);
+  }
+
+  // The court itself, walled and gated: four gates on the south, four on the
+  // north, and on the east the Nicanor Gate, whose bronze doors were kept when
+  // all the others were replaced with gold.
+  box(temple, (court.west + court.east) / 2, chelFloor, axis, court.east - court.west, courtFloor - chelFloor, court.south - court.north, '#c7bea1');
+  for (const z of [court.north, court.south]) box(temple, (court.west + court.east) / 2, courtFloor, z, court.east - court.west, cu(22), 3, '#cdc4ab');
+  box(temple, court.west, courtFloor, axis, 3, cu(22), court.south - court.north, '#cdc4ab');
+  for (const z of [court.north, court.south]) {
+    for (let i = 0; i < 4; i++) box(temple, court.west + 14 + i * 22, courtFloor, z, cu(10), cu(20), 3.6, '#4a4437');
+  }
+  box(temple, court.east, courtFloor, axis, 3, cu(24), court.south - court.north, '#cdc4ab');
+  box(temple, court.east, courtFloor, axis, 4.4, cu(20), cu(20), gold);
+  for (const dz of [-cu(12), cu(12)]) box(temple, court.east + 0.4, courtFloor, axis + dz, 5, cu(18), cu(9), '#8a6a2e');
+
+  // Eleven cubits for Israel, then a dais of three half-cubit steps lifting the
+  // Court of the Priests two and a half cubits above it.
+  for (let i = 0; i < 3; i++) box(temple, court.east - cu(11) - i * cu(1), courtFloor + i * cu(0.5), axis, cu(1), cu(0.5), court.south - court.north - 6, '#c6bda0');
+  box(temple, court.east - cu(15), courtFloor + cu(1.5), axis, cu(8), cu(1), court.south - court.north - 6, '#c6bda0');
+
+  // Six chambers open off the court: salt, parvah and the washers' chamber on
+  // the north; the wood chamber, the chamber of the exile with its cistern, and
+  // the Chamber of Hewn Stone where the Sanhedrin judged the priesthood.
+  for (const [z, d] of [[court.north + cu(15), 1], [court.south - cu(15), -1]] as const) {
+    for (let i = 0; i < 3; i++) {
+      const x = court.west + 20 + i * 26;
+      box(temple, x, courtFloor, z, cu(24), cu(18), cu(26), '#c4bb9e');
+      box(temple, x, courtFloor + cu(18), z, cu(26), cu(2), cu(28), '#b3a887');
+      box(temple, x, courtFloor, z - d * cu(13), cu(5), cu(12), 1.4, '#4a4437');
+    }
+  }
+
+  // The altar of unhewn stone, thirty-two cubits square, rising by foundation
+  // and surround to the horns, with the ramp on its south side, the laver a
+  // little south of the line between porch and altar, and north of it the place
+  // of slaughtering: twenty-four rings, eight tables, eight dwarf pillars.
+  const altar = { x: 32.6, z: axis };
+  box(temple, altar.x, courtFloor, altar.z, cu(32), cu(1), cu(32), '#c0b596');
+  box(temple, altar.x, courtFloor + cu(1), altar.z, cu(30), cu(5), cu(30), '#bcb191');
+  box(temple, altar.x, courtFloor + cu(6), altar.z, cu(28), cu(3), cu(28), '#b8ac8d');
+  for (const dx of [-cu(13), cu(13)]) for (const dz of [-cu(13), cu(13)]) {
+    box(temple, altar.x + dx, courtFloor + cu(9), altar.z + dz, cu(2), cu(1.5), cu(2), '#c8bda0');
+  }
+  box(temple, altar.x, courtFloor + cu(9), altar.z, cu(24), cu(0.3), cu(24), '#6b5a46'); // the place of the wood pile
+  for (let i = 0; i < 16; i++) box(temple, altar.x, courtFloor + cu(9) - i * cu(0.56), altar.z + cu(16) + i * cu(2), cu(16), cu(0.7), cu(2), '#bdb293');
+  box(temple, altar.x - cu(16), courtFloor, altar.z + cu(5), cu(4), cu(4), cu(4), '#9aa79a'); // the laver
+  for (let row = 0; row < 6; row++) for (let k = 0; k < 4; k++) {
+    box(temple, altar.x - cu(3) + row * cu(4), courtFloor, altar.z - cu(13) - k * cu(6), cu(1.6), 0.2, cu(1.6), '#6f6a55');
+  }
+  for (let i = 0; i < 8; i++) box(temple, altar.x - cu(13) + i * cu(3.6), courtFloor, altar.z - cu(41), cu(2.4), cu(1.6), cu(5), '#d2cab4');
+  for (let i = 0; i < 8; i++) box(temple, altar.x - cu(13) + i * cu(3.6), courtFloor, altar.z - cu(49), cu(1.2), cu(8), cu(1.2), '#b0a68a');
+  box(temple, altar.x - cu(0.4), courtFloor + cu(8), altar.z - cu(49), cu(27), cu(0.8), cu(1.4), '#7b6a4a');
+
+  // Twelve steps from the court up to the porch.
+  for (let i = 0; i < 12; i++) box(temple, 14.4 + i * cu(1), courtFloor + i * cu(0.5), axis, cu(1), cu(0.5), cu(40), '#c8bfa6');
+
+  // The sanctuary. A hundred cubits each way: the porch a hundred wide and a
+  // hundred high, the body behind it seventy wide, thirty-eight cells in three
+  // storeys round the north, west and south, and the Hekhal and its upper
+  // chamber rising through them to the roof.
+  const porch = { east: 13.6, west: 5.6 };
+  const body = { east: porch.west, west: -36.4 };
+  const cells = { x: (body.east + body.west) / 2, w: body.east - body.west };
+  box(temple, cells.x, porchFloor - cu(6), axis, cu(100), cu(6), cu(100), '#e4dbc4'); // the six-cubit foundation
+  box(temple, (porch.east + porch.west) / 2, porchFloor, axis, porch.east - porch.west, cu(100), cu(100), '#efe7d4');
+  box(temple, cells.x, porchFloor, axis, cells.w, cu(40), cu(70), '#eae2ce');
+  box(temple, cells.x, porchFloor + cu(40), axis, cells.w + 1, cu(3), cu(70) + 1, '#d8cfb6'); // guttering over the cells
+  box(temple, cells.x + 3, porchFloor, axis, cells.w - 6, cu(100), cu(32), '#efe7d4');
+  box(temple, cells.x + 3, porchFloor + cu(100), axis, cells.w - 5, cu(3), cu(33), '#e2d9c0'); // the parapet
+  box(temple, (porch.east + porch.west) / 2, porchFloor + cu(100), axis, porch.east - porch.west + 1, cu(3), cu(101), '#e2d9c0');
+  box(temple, (porch.east + porch.west) / 2, porchFloor + cu(100) - cu(1), axis, porch.east - porch.west - 1, cu(1), cu(100) - 1, gold);
+  // Golden spikes along the roofs, so that no bird should settle on the house.
+  const spikes: number[][] = [];
+  for (let i = 0; i < 24; i++) {
+    spikes.push([porch.east - 0.5, porchFloor + cu(103), axis - cu(48) + i * 2.1, 0.2, cu(1), 0.2]);
+    spikes.push([cells.x + 3, porchFloor + cu(103), axis - cu(15) + i * 0.65, 0.2, cu(1), 0.2]);
+  }
+  instances(temple, columnGeometry, gold, spikes);
+  // The porch stands open — Josephus hangs a golden vine with clusters the
+  // height of a man over it — and the doorway of the Hekhal behind it is twenty
+  // cubits high and ten broad, with its four doors.
+  box(temple, porch.east + 0.3, porchFloor, axis, 1.2, cu(40), cu(20), '#584b34');
+  box(temple, porch.east + 0.5, porchFloor + cu(40), axis, 1.8, cu(5), cu(26), gold);
+  box(temple, porch.west + 0.3, porchFloor, axis, 1.2, cu(20), cu(10), '#4a4029');
 
   // Huldah gates and the monumental stair, on the southern wall.
   const [fx, fz] = platformToWorld(-67, SOUTH + 34);

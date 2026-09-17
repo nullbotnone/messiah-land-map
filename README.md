@@ -71,7 +71,9 @@ The site list also works with a keyboard and remains available without WebGL.
 The model covers the Temple Mount — retaining walls, double porticoes,
 Solomon's Portico, the Royal Stoa, the Huldah gates and their monumental stair,
 Robinson's Arch over the Tyropoeon street, Wilson's Arch and the Xystus, the
-inner courts, altar and sanctuary — the Antonia on its rock, Herod's western
+inner courts and their six chambers, the altar with its ramp and the place of
+slaughtering, and the sanctuary with its cells, its stepped approach and its
+golden vine — the Antonia on its rock, Herod's western
 palace and the three towers, the palatial mansion of the Upper City, Bethesda's
 twin pools under five porticoes, Siloam and the stepped street, the Gihon
 spring, the Kidron valley tombs, the Golgotha candidate in its quarry, the
