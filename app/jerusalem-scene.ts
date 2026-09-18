@@ -440,6 +440,41 @@ export function buildJerusalemScene() {
   box(temple, porch.east + 0.5, porchFloor + cu(40), axis, 1.8, cu(5), cu(26), gold);
   box(temple, porch.west + 0.2, porchFloor, axis, 0.25, cu(20), cu(10), '#4a4029');
 
+  // Small low-poly figures give the courts a human scale without pretending to
+  // reconstruct individual people. They stay on the documented floor levels:
+  // worshippers in the Court of the Women and Israelite court, and priests or
+  // attendants around the raised court and the altar service area.
+  const people = part(temple, 'sanctuary-people');
+  const personBodyGeometry = new THREE.ConeGeometry(0.72, 1, 6);
+  const personHeadGeometry = new THREE.SphereGeometry(1, 6, 4);
+  const bodyTransforms = new Map<string, number[][]>();
+  const headTransforms: number[][] = [];
+  const person = (x: number, z: number, floor: number, robe: string, rotation = 0) => {
+    const body = bodyTransforms.get(robe) ?? [];
+    body.push([x, floor + 1.25, z, 1, 2.5, 1, rotation]);
+    bodyTransforms.set(robe, body);
+    headTransforms.push([x, floor + 2.8, z, 0.48, 0.48, 0.48, rotation]);
+  };
+  const womenPeople: [number, number][] = [
+    [65, -24], [78, -24], [91, -24], [104, -24],
+    [65, 23], [80, 23], [95, 23], [109, 23],
+    [61, -8], [61, 8], [74, -8], [88, 10], [101, -8], [112, 8],
+  ];
+  womenPeople.forEach(([x, z], i) => person(x, z, chelFloor, i % 3 === 0 ? '#8e806c' : i % 3 === 1 ? '#697a78' : '#a38c6d', i % 2 ? Math.PI : 0));
+  const courtPeople: [number, number][] = [
+    [-31, -23], [-18, -23], [-5, -23], [9, -23],
+    [-31, 20], [-18, 20], [-5, 20], [9, 20],
+    [-27, -7], [-14, 6], [0, -7], [14, 8],
+  ];
+  courtPeople.forEach(([x, z], i) => person(x, z, courtFloor, i % 2 ? '#7c7161' : '#9a8569', i % 2 ? Math.PI : 0));
+  const priestPeople: [number, number][] = [
+    [20, -13], [20, 7], [44, -14], [44, 10],
+    [24, -27], [35, -27], [42, -27], [18, 13],
+  ];
+  priestPeople.forEach(([x, z], i) => person(x, z, priestFloor, i % 2 ? '#b7a27e' : '#6c7771', i % 2 ? Math.PI : 0));
+  for (const [robe, transforms] of bodyTransforms) instances(people, personBodyGeometry, robe, transforms);
+  instances(people, personHeadGeometry, '#8a6f59', headTransforms);
+
   // Separate southern approaches: the broad excavated flight belongs to the
   // Double Gate. The narrower Triple Gate approach is schematic. The doors
   // are below the esplanade and lead to internal rising passages.
