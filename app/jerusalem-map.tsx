@@ -33,7 +33,7 @@ export default function JerusalemMap({ lang, onReturn }: { lang: Lang; onReturn:
   const layersRef = useRef<ReturnType<typeof buildJerusalemScene> | null>(null);
   const selectedRef = useRef(lastSelected);
   const [selected, setSelected] = useState(lastSelected);
-  const [layers, setLayers] = useState<Layers>({ housing: true, walls: true, roads: true, labels: true, shadows: true });
+  const [layers, setLayers] = useState<Layers>({ housing: true, walls: true, roads: true, labels: true, shadows: false });
   const [failed, setFailed] = useState(false);
   const active = jerusalemSites.find((s) => s.id === selected)!;
 
@@ -54,7 +54,7 @@ export default function JerusalemMap({ lang, onReturn }: { lang: Lang; onReturn:
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1;
-    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.enabled = false;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     el.appendChild(renderer.domElement);
     const scene = new THREE.Scene();
@@ -62,7 +62,7 @@ export default function JerusalemMap({ lang, onReturn }: { lang: Lang; onReturn:
     scene.add(new THREE.HemisphereLight('#fff7e8', '#657369', 1.25));
     const sun = new THREE.DirectionalLight('#fff1d7', 2.4);
     sun.position.set(-400, 700, 300); sun.target.position.set(30, 140, 0);
-    sun.castShadow = true;
+    sun.castShadow = false;
     sun.shadow.mapSize.set(2048, 2048);
     Object.assign(sun.shadow.camera, { left: -420, right: 420, top: 420, bottom: -420, near: 1, far: 1600 });
     sun.shadow.normalBias = 0.3;
@@ -123,7 +123,7 @@ export default function JerusalemMap({ lang, onReturn }: { lang: Lang; onReturn:
       if (compass) compass.style.transform = `rotate(${-controls.getAzimuthalAngle()}rad)`;
       if (!animation && performance.now() < awakeUntil) animation = requestAnimationFrame(render);
     }
-    let shadowsEnabled = true;
+    let shadowsEnabled = false;
     viewer.current = {
       focus(site) {
         if (!site) defaultView();
@@ -262,11 +262,11 @@ export default function JerusalemMap({ lang, onReturn }: { lang: Lang; onReturn:
         </div>
         {failed && <div className="city-fallback" role="status"><p>{t('浏览器暂时无法显示 3D 地图，仍可在右侧浏览地点与重建资料。', '3D rendering is unavailable in this browser. The site guide and reconstruction sources remain accessible.')}</p><button onClick={onReturn}>{t('返回以色列地图', 'Return to Israel map')}</button></div>}
         <div className="city-tools" aria-label={t('城市视图控制', 'City view controls')}>
-          <button onClick={() => viewer.current?.north()} aria-label={t('正北朝上', 'Face north')}><span className="city-north-arrow">↑</span> N</button>
-          <button onClick={() => viewer.current?.zoom(1.25)} aria-label={t('放大', 'Zoom in')}>＋</button>
-          <button onClick={() => viewer.current?.zoom(0.8)} aria-label={t('缩小', 'Zoom out')}>−</button>
-          <button onClick={() => viewer.current?.top()}>{t('俯瞰', 'Top')}</button>
-          <button onClick={() => viewer.current?.focus()}>{t('全城', 'City')}</button>
+          <button onClick={() => viewer.current?.north()} aria-label={t('正北朝上', 'Face north')} title={t('正北朝上', 'Face north')}><span className="city-north-arrow">↑</span></button>
+          <button onClick={() => viewer.current?.zoom(1.25)} aria-label={t('放大', 'Zoom in')} title={t('放大', 'Zoom in')}>＋</button>
+          <button onClick={() => viewer.current?.zoom(0.8)} aria-label={t('缩小', 'Zoom out')} title={t('缩小', 'Zoom out')}>−</button>
+          <button onClick={() => viewer.current?.focus()} aria-label={t('全城总览', 'Full city view')} title={t('全城总览', 'Full city view')}>⌂</button>
+          <button onClick={() => viewer.current?.top()} aria-label={t('俯瞰视角', 'Top-down view')} title={t('俯瞰视角', 'Top-down view')}>⊡</button>
           <button
             className={layers.shadows ? 'on' : ''}
             onClick={() => setLayers((v) => ({ ...v, shadows: !v.shadows }))}
@@ -274,7 +274,7 @@ export default function JerusalemMap({ lang, onReturn }: { lang: Lang; onReturn:
             aria-label={t('切换阴影效果', 'Toggle shadow effect')}
             title={t(layers.shadows ? '关闭阴影' : '开启阴影', layers.shadows ? 'Turn off shadow' : 'Turn on shadow')}
           >
-            {t('阴影', 'Shadow')}
+            ◐
           </button>
         </div>
         <div className="city-terrain-key">

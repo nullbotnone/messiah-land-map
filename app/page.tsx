@@ -619,12 +619,12 @@ const hits = (a: Box, b: Box) => a.x0 < b.x1 && a.x1 > b.x0 && a.y0 < b.y1 && a.
           </div>
 
           <div className="view-tools" aria-label="地图视图控制">
-            <button onClick={() => zoomAt(1.25)} aria-label="放大">＋</button>
-            <button onClick={() => zoomAt(1 / 1.25)} aria-label="缩小">−</button>
-            <button onClick={() => setView((v) => ({ ...DEFAULT_VIEW, perspective: v.perspective }))} aria-label="重置视图">⌂</button>
-            <button className={view.perspective ? 'on' : ''} onClick={() => setView((v) => ({ ...v, perspective: !v.perspective }))} aria-label="切换透视投影">⏢</button>
-            <button className={showRegions ? 'on' : ''} onClick={() => setShowRegions((s) => !s)} aria-label="切换分封疆界">▧</button>
-            <button className={showTowns ? 'on' : ''} onClick={() => setShowTowns((s) => !s)} aria-label="切换城邑标注">◦</button>
+            <button onClick={() => zoomAt(1.25)} aria-label="放大" title="放大">＋</button>
+            <button onClick={() => zoomAt(1 / 1.25)} aria-label="缩小" title="缩小">−</button>
+            <button onClick={() => setView((v) => ({ ...DEFAULT_VIEW, perspective: v.perspective }))} aria-label="重置视图" title="重置视图">⌂</button>
+            <button className={view.perspective ? 'on' : ''} onClick={() => setView((v) => ({ ...v, perspective: !v.perspective }))} aria-label="切换透视投影" title="切换透视投影">⏢</button>
+            <button className={showRegions ? 'on' : ''} onClick={() => setShowRegions((s) => !s)} aria-label="切换分封疆界" title="切换分封疆界">▧</button>
+            <button className={showTowns ? 'on' : ''} onClick={() => setShowTowns((s) => !s)} aria-label="切换城邑标注" title="切换城邑标注">◦</button>
           </div>
           <Compass rotation={view.rotation} onReset={() => setView((v) => ({ ...v, rotation: 0 }))} />
 
