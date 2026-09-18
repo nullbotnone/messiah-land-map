@@ -77,7 +77,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--gold-bright); o
 .city-labels { position: absolute; inset: 0; pointer-events: none; }
 .city-label { position: absolute; visibility: hidden; transform: translate(-50%, -100%); color: #eee4cd; background: #071619c9; border: 1px solid #c8a75d40; border-left: 2px solid #c8a75d80; padding: 6px 9px; font-size: 10px; cursor: pointer; pointer-events: auto; white-space: nowrap; backdrop-filter: blur(5px); }
 .city-label.active { color: #f6d895; background: #142725e8; border-color: var(--gold); z-index: 2; }
-.city-landform-label { color: #ccd3c1; border: 0; background: #10272070; font-style: italic; letter-spacing: .12em; pointer-events: none; }
+.city-landform-label { color: #ccd3c1; border: 0; background: #10272070; font-style: italic; letter-spacing: .12em; pointer-events: auto; cursor: pointer; }
 .city-terrain-key { position: absolute; left: 30px; right: 80px; bottom: 68px; display: flex; flex-direction: column; gap: 9px; pointer-events: none; }
 .city-terrain-key b { font-size: 10px; font-weight: 400; color: #c5b992; }
 .city-terrain-key span { font-size: 9px; color: #829088; }

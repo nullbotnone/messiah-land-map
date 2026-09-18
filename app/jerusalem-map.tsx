@@ -10,6 +10,7 @@ import { toTraditional } from './zh-hant';
 type Lang = 'hans' | 'hant' | 'en';
 type Viewer = {
   focus: (site?: JerusalemSite) => void;
+  focusPoint: (x: number, z: number) => void;
   zoom: (factor: number) => void;
   north: () => void;
   top: () => void;
@@ -33,6 +34,7 @@ export default function JerusalemMap({ lang, onReturn }: { lang: Lang; onReturn:
   const layersRef = useRef<ReturnType<typeof buildJerusalemScene> | null>(null);
   const selectedRef = useRef(lastSelected);
   const [selected, setSelected] = useState(lastSelected);
+  const [selectedLandform, setSelectedLandform] = useState<string | null>(null);
   const [layers, setLayers] = useState<Layers>({ housing: true, walls: true, roads: true, labels: true, shadows: false });
   const [failed, setFailed] = useState(false);
   const active = jerusalemSites.find((s) => s.id === selected)!;
@@ -135,6 +137,13 @@ export default function JerusalemMap({ lang, onReturn }: { lang: Lang; onReturn:
         }
         wake();
       },
+      focusPoint(x, z) {
+        const y = cityGround(x, z);
+        controls.target.set(x, y, z);
+        camera.position.set(x - 480, y + 550, z + 710);
+        controls.update();
+        wake();
+      },
       zoom(factor) {
         const delta = camera.position.clone().sub(controls.target);
         delta.setLength(Math.max(controls.minDistance, Math.min(controls.maxDistance, delta.length() / factor)));
@@ -187,7 +196,7 @@ export default function JerusalemMap({ lang, onReturn }: { lang: Lang; onReturn:
       const hit = raycaster.intersectObjects(city.root.children, true)[0];
       let obj: THREE.Object3D | null = hit?.object ?? null;
       while (obj) {
-        if (obj.userData.siteId) { setSelected(obj.userData.siteId); break; }
+        if (obj.userData.siteId) { setSelectedLandform(null); setSelected(obj.userData.siteId); break; }
         obj = obj.parent;
       }
       wake();
@@ -244,7 +253,12 @@ export default function JerusalemMap({ lang, onReturn }: { lang: Lang; onReturn:
 
   const choose = (site: JerusalemSite, focus = false) => {
     setSelected(site.id);
+    setSelectedLandform(null);
     if (focus) viewer.current?.focus(site);
+  };
+  const chooseLandform = (label: (typeof landformLabels)[number]) => {
+    setSelectedLandform(label.id);
+    viewer.current?.focusPoint(label.x, label.z);
   };
   return (
     <div className="city-map" data-no-convert>
@@ -257,7 +271,7 @@ export default function JerusalemMap({ lang, onReturn }: { lang: Lang; onReturn:
         <div className="city-canvas-host" ref={host} tabIndex={0} role="region" aria-label={t('耶路撒冷三维地图 · 拖动旋转，右键平移，滚轮缩放，方向键旋转，加减号缩放', 'Jerusalem 3D map · drag to orbit, right-drag to pan, scroll to zoom, arrows to orbit, plus and minus to zoom')}>
           {!failed && <div className="city-labels" hidden={!layers.labels}>
             {jerusalemSites.map((site) => <button key={site.id} ref={(el) => { if (el) labelRefs.current.set(site.id, el); else labelRefs.current.delete(site.id); }} className={`city-label ${selected === site.id ? 'active' : ''}`} onClick={() => choose(site)}>{t(site.name, site.en)}</button>)}
-            {landformLabels.map((label) => <span key={label.id} ref={(el) => { if (el) labelRefs.current.set(label.id, el); else labelRefs.current.delete(label.id); }} className="city-label city-landform-label">{t(label.name, label.en)}</span>)}
+            {landformLabels.map((label) => <button key={label.id} type="button" ref={(el) => { if (el) labelRefs.current.set(label.id, el); else labelRefs.current.delete(label.id); }} className={`city-label city-landform-label ${selectedLandform === label.id ? 'active' : ''}`} onClick={() => chooseLandform(label)} aria-pressed={selectedLandform === label.id} aria-label={t(`聚焦${label.name}`, `Focus on ${label.en}`)} title={t(`聚焦${label.name}`, `Focus on ${label.en}`)}>{t(label.name, label.en)}</button>)}
           </div>}
         </div>
         {failed && <div className="city-fallback" role="status"><p>{t('浏览器暂时无法显示 3D 地图，仍可在右侧浏览地点与重建资料。', '3D rendering is unavailable in this browser. The site guide and reconstruction sources remain accessible.')}</p><button onClick={onReturn}>{t('返回以色列地图', 'Return to Israel map')}</button></div>}
