@@ -48,6 +48,7 @@ const CONVERT: Record<Lang, ((s: string) => string) | null> = {
   hans: null, hant: toTraditional, en: toEnglish,
 };
 const HTML_LANG: Record<Lang, string> = { hans: 'zh-CN', hant: 'zh-Hant', en: 'en' };
+const PAGE_TITLE = '弥赛亚之地｜耶稣时代以色列 3D 互动地图';
 
 const rgb = (c: [number, number, number]) => `rgb(${c[0]},${c[1]},${c[2]})`;
 
@@ -448,6 +449,7 @@ const hits = (a: Box, b: Box) => a.x0 < b.x1 && a.x1 > b.x0 && a.y0 < b.y1 && a.
     if (!convert && !converted.current) return;
     converted.current = convert !== null;
     document.documentElement.lang = HTML_LANG[lang];
+    document.title = convert ? convert(PAGE_TITLE) : PAGE_TITLE;
 
     const store = written.current;
     const swap = (node: Node, read: () => string, write: (value: string) => void) => {
